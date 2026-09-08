@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="The New Amsterdam Times — independent reporting on business, markets, cities and ideas." />
+    <title>The New Amsterdam Times</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="content/articles.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body data-page="home">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <div class="notice-bar">
+      <p>Independent perspective for an interconnected age.</p>
+      <a href="#subscribe">Subscribe</a>
+    </div>
+
+    <header class="site-header">
+      <div class="utility-row page-shell">
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-nav">
+          <span aria-hidden="true">☰</span> Menu
+        </button>
+        <p class="today" data-current-date></p>
+        <p class="edition">Bloomington Edition</p>
+        <a class="utility-subscribe" href="#subscribe">Subscribe</a>
+      </div>
+
+      <div class="masthead page-shell">
+        <a href="index.html" aria-label="The New Amsterdam Times home">The New Amsterdam Times</a>
+      </div>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
+        <div class="page-shell nav-inner">
+          <a class="active" href="index.html">Home</a>
+          <a href="index.html">Home</a>
+          <a href="newsletter.html">Newsletter</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-shell" id="main-content">
+      <section class="section-heading front-heading" aria-labelledby="top-stories-title">
+        <div>
+          <p class="eyebrow">Week's Dossier</p>
+          <h1 id="top-stories-title">The week’s essential stories and ideas</h1>
+        </div>
+        <p>Updated <time data-current-time></time></p>
+      </section>
+
+      <section class="lead-grid" aria-label="Top stories">
+        <div class="secondary-column" data-secondary-stories></div>
+        <article class="lead-story" data-lead-story></article>
+        <aside class="latest-column" aria-labelledby="latest-title">
+          <div class="rail-heading">
+            <h2 id="latest-title">Latest</h2>
+            <span aria-hidden="true"></span>
+          </div>
+          <div data-latest-stories></div>
+        </aside>
+      </section>
+
+      <section class="more-section" aria-labelledby="more-title">
+        <div class="section-rule-heading">
+          <h2 id="more-title">More From The Times</h2>
+        </div>
+        <div class="story-grid" data-more-stories></div>
+      </section>
+
+      <section class="subscribe-panel" id="subscribe" aria-labelledby="subscribe-title">
+        <div>
+          <p class="eyebrow">The Weekly Rapport</p>
+          <h2 id="subscribe-title">The New Amsterdam Times, delivered.</h2>
+          <p hidden>Sharp reporting and original analysis, sent each weekday morning.</p>
+        </div>
+        <form class="subscribe-form" data-subscribe-form>
+          <label class="sr-only" for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="Email address" required />
+          <button type="submit">Subscribe</button>
+          <p class="form-note" data-form-note>By subscribing, you agree to receive The Weekly Rapport.</p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="page-shell footer-inner">
+        <a class="footer-mark" href="index.html">The New Amsterdam Times</a>
+        <nav aria-label="Footer navigation">
+          <a href="newsletter.html">Newsletter</a>
+          <a href="about.html">About</a>
+          <a href="about.html">Contact</a>
+        </nav>
+        <p>© <span data-current-year></span> The New Amsterdam Times</p>
+      </div>
+    </footer>
+  </body>
+</html>
