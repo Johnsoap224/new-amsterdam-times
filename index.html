@@ -35,8 +35,9 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
         <div class="page-shell nav-inner">
           <a class="active" href="index.html">Home</a>
-          <a href="index.html">Home</a>
           <a href="newsletter.html">Newsletter</a>
+          <a href="opinion.html">Opinion</a>
+          <a href="about.html">About</a>
         </div>
       </nav>
     </header>
@@ -75,11 +76,12 @@
           <h2 id="subscribe-title">The New Amsterdam Times, delivered.</h2>
           <p hidden>Sharp reporting and original analysis, sent each weekday morning.</p>
         </div>
-        <form class="subscribe-form" data-subscribe-form>
+        <form class="subscribe-form" action="/api/subscribe" method="post" data-subscribe-form>
           <label class="sr-only" for="email">Email address</label>
           <input id="email" name="email" type="email" autocomplete="email" placeholder="Email address" required />
+          <input name="website" type="text" tabindex="-1" autocomplete="off" hidden />
           <button type="submit">Subscribe</button>
-          <p class="form-note" data-form-note>By subscribing, you agree to receive The Weekly Rapport.</p>
+          <p class="form-note" data-form-note aria-live="polite">By subscribing, you agree to receive The Weekly Rapport.</p>
         </form>
       </section>
     </main>
@@ -89,6 +91,7 @@
         <a class="footer-mark" href="index.html">The New Amsterdam Times</a>
         <nav aria-label="Footer navigation">
           <a href="newsletter.html">Newsletter</a>
+          <a href="opinion.html">Opinion</a>
           <a href="about.html">About</a>
           <a href="about.html">Contact</a>
         </nav>

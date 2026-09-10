@@ -153,6 +153,12 @@ button, input { font: inherit; }
   text-transform: uppercase;
 }
 
+.story-kicker[data-category="opinion"] {
+  color: #d98f34;
+}
+
+body[data-page="opinion"] .interior-heading h1 { color: #A67B2D; }
+
 .lead-grid {
   display: grid;
   grid-template-columns: minmax(190px, .75fr) minmax(400px, 1.85fr) minmax(210px, .8fr);
@@ -240,7 +246,10 @@ button, input { font: inherit; }
 .subscribe-form { display: grid; grid-template-columns: 1fr auto; }
 .subscribe-form input { min-width: 0; padding: 14px; border: 1px solid #777; border-right: 0; background: white; font: 14px var(--sans); }
 .subscribe-form button { padding: 0 24px; border: 1px solid var(--ink); color: white; background: var(--ink); font: 700 13px var(--sans); cursor: pointer; }
+.subscribe-form button:disabled { cursor: wait; opacity: .65; }
 .form-note { grid-column: 1 / -1; margin: 8px 0 0; color: var(--muted); font: 10px/1.3 var(--sans); }
+.form-note--success { color: #355c2d; }
+.form-note--error { color: #9b2c24; }
 
 .site-footer { padding: 38px 0; color: white; background: #202020; }
 .footer-inner { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 30px; }
@@ -252,9 +261,8 @@ button, input { font: inherit; }
 .interior-heading { max-width: 760px; padding-bottom: 20px; border-bottom: 4px solid var(--ink); }
 .interior-heading h1 { margin: 0; font-size: clamp(42px, 6vw, 70px); line-height: .95; letter-spacing: -.04em; }
 .interior-heading p { margin: 14px 0 0; color: var(--muted); font-size: 18px; line-height: 1.4; }
-body[data-page="about"] .interior-heading .eyebrow { color: #d98f34; }
-
 .archive { max-width: 900px; }
+.archive-empty { margin: 32px 0 0; padding: 28px 0; border-block: 1px solid var(--rule); color: var(--muted); font-size: 19px; }
 .archive-story { display: grid; grid-template-columns: 260px 1fr; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--rule); }
 .archive-story--no-image { grid-template-columns: 1fr; }
 .archive-story img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }

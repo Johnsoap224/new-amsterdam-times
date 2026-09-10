@@ -23,6 +23,7 @@
   })[character]);
   const articleUrl = (article) => `article.html?slug=${encodeURIComponent(article.slug)}`;
   const storyTime = (article) => timeFormat.format(new Date(article.date));
+  const storyKicker = (article) => `<p class="story-kicker" data-category="${escapeHtml(article.category.toLowerCase())}">${escapeHtml(article.category)}</p>`;
 
   function storyImage(article, className, loading = "eager") {
     if (!article.image) return "";
@@ -51,13 +52,64 @@
     }
 
     document.querySelectorAll("[data-subscribe-form]").forEach((form) => {
-      form.addEventListener("submit", (event) => {
+      const note = form.querySelector("[data-form-note]");
+      const button = form.querySelector("button[type='submit']");
+
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const note = form.querySelector("[data-form-note]");
-        if (note) note.textContent = "You’re on the list. Welcome to The New Amsterdam Times.";
-        form.reset();
+        const formData = new FormData(form);
+        const originalLabel = button?.textContent || "Subscribe";
+
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Submitting…";
+        }
+        if (note) {
+          note.className = "form-note";
+          note.textContent = "Adding your address…";
+        }
+
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: formData.get("email"),
+              website: formData.get("website")
+            })
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "We couldn’t add your address.");
+
+          if (note) {
+            note.className = "form-note form-note--success";
+            note.textContent = result.message;
+          }
+          form.reset();
+        } catch (error) {
+          if (note) {
+            note.className = "form-note form-note--error";
+            note.textContent = error.message || "We couldn’t add your address. Please try again.";
+          }
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalLabel;
+          }
+        }
       });
     });
+
+    const subscriptionStatus = new URLSearchParams(window.location.search).get("subscription");
+    if (subscriptionStatus) {
+      const note = document.querySelector("[data-form-note]");
+      if (note) {
+        note.className = `form-note ${subscriptionStatus === "confirmed" ? "form-note--success" : "form-note--error"}`;
+        note.textContent = subscriptionStatus === "confirmed"
+          ? "Your subscription is confirmed. Welcome to The Weekly Rapport."
+          : "That confirmation link is invalid or has expired. Please subscribe again.";
+      }
+    }
   }
 
   function renderHome() {
@@ -71,7 +123,7 @@
     if (featured && leadNode) {
       leadNode.innerHTML = `
         ${storyImage(featured, "lead-image")}
-        <p class="story-kicker">${escapeHtml(featured.category)}</p>
+        ${storyKicker(featured)}
         <h2><a href="${articleUrl(featured)}">${escapeHtml(featured.title)}</a></h2>
         <p class="story-summary">${escapeHtml(featured.summary)}</p>
         <p class="byline">By ${escapeHtml(featured.author)}</p>
@@ -82,7 +134,7 @@
       secondaryNode.innerHTML = remaining.slice(0, 2).map((article, index) => `
         <article class="secondary-story${article.image ? "" : " secondary-story--no-image"}">
           ${index === 0 ? storyImage(article, "secondary-image") : ""}
-          <p class="story-kicker">${escapeHtml(article.category)}</p>
+          ${storyKicker(article)}
           <h2><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
           <p class="story-summary">${escapeHtml(article.summary)}</p>
         </article>
@@ -102,7 +154,7 @@
       moreNode.innerHTML = remaining.slice(0, 6).map((article) => `
         <article class="story-card">
           ${storyImage(article, "card-image", "lazy")}
-          <p class="story-kicker">${escapeHtml(article.category)}</p>
+          ${storyKicker(article)}
           <h3><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h3>
           <p class="story-summary">${escapeHtml(article.summary)}</p>
           <p class="byline">By ${escapeHtml(article.author)}</p>
@@ -114,11 +166,21 @@
   function renderArchive() {
     const archive = document.querySelector("[data-archive]");
     if (!archive) return;
-    archive.innerHTML = articles.map((article) => `
+    const requestedCategory = archive.dataset.category;
+    const archiveArticles = requestedCategory
+      ? articles.filter((article) => article.category.toLowerCase() === requestedCategory.toLowerCase())
+      : articles;
+
+    if (!archiveArticles.length) {
+      archive.innerHTML = `<p class="archive-empty">No ${escapeHtml(requestedCategory || "").toLowerCase()} articles have been published yet.</p>`;
+      return;
+    }
+
+    archive.innerHTML = archiveArticles.map((article) => `
       <article class="archive-story${article.image ? "" : " archive-story--no-image"}">
         ${storyImage(article, "archive-image", "lazy")}
         <div>
-          <p class="story-kicker">${escapeHtml(article.category)}</p>
+          ${storyKicker(article)}
           <h2><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
           <p class="story-summary">${escapeHtml(article.summary)}</p>
           <p class="byline">By ${escapeHtml(article.author)} · <time datetime="${escapeHtml(article.date)}">${dateFormat.format(new Date(article.date))}</time></p>
@@ -152,7 +214,7 @@
     root.innerHTML = `
       ${previewBanner}
       <header class="article-header">
-        <p class="story-kicker">${escapeHtml(article.category)}</p>
+        ${storyKicker(article)}
         <h1>${escapeHtml(article.title)}</h1>
         <p class="article-dek">${escapeHtml(article.summary)}</p>
         <div class="article-meta">
@@ -175,6 +237,6 @@
 
   setSharedChrome();
   if (document.body.dataset.page === "home") renderHome();
-  if (document.body.dataset.page === "newsletter") renderArchive();
+  if (document.querySelector("[data-archive]")) renderArchive();
   if (document.body.dataset.page === "article") renderArticle();
 })();
