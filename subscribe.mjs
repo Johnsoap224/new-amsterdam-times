@@ -52,10 +52,14 @@ function configurationError() {
 }
 
 async function supabaseRequest(path, options = {}) {
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
   const response = await fetch(`${process.env.SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${path}`, {
     ...options,
     headers: {
-      apikey: process.env.SUPABASE_SECRET_KEY,
+      apikey: secretKey,
+      // Legacy service-role keys are JWTs and also require the Authorization header.
+      // New sb_secret_* keys authenticate through the apikey header alone.
+      ...(secretKey.startsWith("eyJ") ? { Authorization: `Bearer ${secretKey}` } : {}),
       "Content-Type": "application/json",
       ...options.headers
     }
@@ -65,8 +69,9 @@ async function supabaseRequest(path, options = {}) {
     const detail = await response.text();
     throw new Error(`Subscriber database request failed (${response.status}): ${detail}`);
   }
-  if (response.status === 204) return null;
-  return response.json();
+  const responseText = await response.text();
+  if (!responseText) return null;
+  return JSON.parse(responseText);
 }
 
 async function resendRequest(path, body, { method = "POST", idempotencyKey } = {}) {
@@ -140,21 +145,39 @@ async function subscribe(request) {
   const siteUrl = process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
   const confirmationUrl = `${siteUrl}/api/subscribe?token=${encodeURIComponent(token)}`;
   const safeUrl = escapeHtml(confirmationUrl);
-  await resendRequest("emails", {
-    from: process.env.NEWSLETTER_FROM,
-    to: [email],
-    subject: "Confirm your subscription to The Weekly Rapport",
-    ...(process.env.NEWSLETTER_REPLY_TO ? { reply_to: process.env.NEWSLETTER_REPLY_TO } : {}),
-    html: `
-      <div style="max-width:600px;margin:auto;padding:32px;color:#171717;font-family:Georgia,serif">
-        <p style="font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#a67b2d">The New Amsterdam Times</p>
-        <h1 style="font-size:36px;line-height:1.05">Confirm your subscription</h1>
-        <p style="font-size:18px;line-height:1.55">Click below to confirm that you want to receive The Weekly Rapport.</p>
-        <p style="margin:30px 0"><a href="${safeUrl}" style="display:inline-block;padding:13px 20px;color:#fff;background:#171717;text-decoration:none;font:700 14px Arial,sans-serif">Confirm subscription</a></p>
-        <p style="color:#666;font-size:14px;line-height:1.45">This link expires in 24 hours. If you did not request this, you can ignore this email.</p>
-      </div>`,
-    text: `Confirm your subscription to The Weekly Rapport: ${confirmationUrl}\n\nThis link expires in 24 hours. If you did not request this, ignore this email.`
-  }, { idempotencyKey: `confirm-${tokenHash}` });
+  try {
+    await resendRequest("emails", {
+      from: process.env.NEWSLETTER_FROM,
+      to: [email],
+      subject: "Confirm your subscription to The Weekly Rapport",
+      ...(process.env.NEWSLETTER_REPLY_TO ? { reply_to: process.env.NEWSLETTER_REPLY_TO } : {}),
+      html: `
+        <div style="max-width:600px;margin:auto;padding:32px;color:#171717;font-family:Georgia,serif">
+          <p style="font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#a67b2d">The New Amsterdam Times</p>
+          <h1 style="font-size:36px;line-height:1.05">Confirm your subscription</h1>
+          <p style="font-size:18px;line-height:1.55">Click below to confirm that you want to receive The Weekly Rapport.</p>
+          <p style="margin:30px 0"><a href="${safeUrl}" style="display:inline-block;padding:13px 20px;color:#fff;background:#171717;text-decoration:none;font:700 14px Arial,sans-serif">Confirm subscription</a></p>
+          <p style="color:#666;font-size:14px;line-height:1.45">This link expires in 24 hours. If you did not request this, you can ignore this email.</p>
+        </div>`,
+      text: `Confirm your subscription to The Weekly Rapport: ${confirmationUrl}\n\nThis link expires in 24 hours. If you did not request this, ignore this email.`
+    }, { idempotencyKey: `confirm-${tokenHash}` });
+  } catch (error) {
+    // Let the visitor retry immediately if the delivery provider rejected the email.
+    try {
+      await supabaseRequest(`subscribers?email=eq.${encodedEmail}`, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          confirmation_token_hash: null,
+          confirmation_expires_at: null
+        })
+      });
+    } catch (cleanupError) {
+      console.error("Could not clear the failed confirmation token", cleanupError);
+    }
+    error.publicMessage = "We couldn’t send the confirmation email. Please try again shortly.";
+    throw error;
+  }
 
   return json({ message: "Check your inbox to confirm your subscription." });
 }
@@ -219,7 +242,9 @@ export default {
       return json({ error: "Method not allowed." }, 405);
     } catch (error) {
       console.error("Subscription request failed", error);
-      return json({ error: "We couldn’t process your subscription. Please try again." }, 500);
+      return json({
+        error: error.publicMessage || "We couldn’t process your subscription. Please try again."
+      }, 500);
     }
   }
 };
