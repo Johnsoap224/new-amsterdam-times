@@ -80,7 +80,6 @@ export function renderNewsletter(article, { test = false } = {}) {
         </td></tr>
         <tr><td style="padding:24px 30px;background:#efede7;border-top:1px solid #d8d4cb;text-align:center;font:12px/1.55 Arial,sans-serif;color:#69645d;">
           <p style="margin:0 0 8px;">You are receiving this because you confirmed a subscription to The New Amsterdam Times.</p>
-          <p style="margin:0 0 8px;">${escapeHtml(process.env.NEWSLETTER_POSTAL_ADDRESS)}</p>
           ${test ? '<p style="margin:0;">The unsubscribe link is activated only in a subscriber Broadcast.</p>' : `<p style="margin:0;"><a href="${unsubscribeUrl}" style="color:#173f5f;">Unsubscribe or manage preferences</a></p>`}
         </td></tr>
       </table>
@@ -101,7 +100,6 @@ export function renderNewsletter(article, { test = false } = {}) {
     `Read this article online: ${canonicalUrl}`,
     "",
     "You are receiving this because you confirmed a subscription to The New Amsterdam Times.",
-    process.env.NEWSLETTER_POSTAL_ADDRESS,
     test ? "This is a test email." : `Unsubscribe or manage preferences: ${unsubscribeUrl}`
   ].join("\n");
 
