@@ -67,7 +67,7 @@ export function renderNewsletter(article, { test = false } = {}) {
           <a href="${escapeHtml(siteUrl())}" style="color:#171717;text-decoration:none;font-family:Georgia,'Times New Roman',serif;font-size:31px;font-weight:700;letter-spacing:-.02em;">The New Amsterdam Times</a>
         </td></tr>
         <tr><td style="padding:34px 30px 24px;">
-          <p style="margin:0 0 12px;font:700 12px Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:${article.category === "Opinion" ? "#9a6a19" : "#173f5f"};">${escapeHtml(article.category)}</p>
+          <p style="margin:0 0 12px;font:700 12px Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:${article.category === "Opinion" ? "#a67b2d" : "#173f5f"};">${escapeHtml(article.category)}</p>
           <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:40px;line-height:1.08;letter-spacing:-.025em;color:#171717;">${escapeHtml(article.title)}</h1>
           <p style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1.45;color:#55514a;">${escapeHtml(article.summary)}</p>
           <p style="margin:0;font:700 12px Arial,sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#55514a;">By ${escapeHtml(article.author)} &nbsp;·&nbsp; ${escapeHtml(formattedDate(article.date))}</p>
