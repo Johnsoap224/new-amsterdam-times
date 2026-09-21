@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/canal-district.png"
 imageAlt: "Brick warehouses under renovation beside a waterfront"
 featured: false
-status: "published"
+status: "draft"
 ---
 
 Brick warehouses survive because they are useful twice. First they hold the machinery of an industrial economy; later they become the raw material of a service economy looking for authenticity.

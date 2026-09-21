@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/market-desk.png"
 imageAlt: "Analysts working at a financial market desk"
 featured: false
-status: "published"
+status: "draft"
 ---
 
 The loudest trade is not always the most important one. Across public and private markets, investors are beginning to pay closer attention to the businesses that can fund their own ambitions.

@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/manhattan-harbor.png"
 imageAlt: "Lower Manhattan and New York Harbor at sunrise"
 featured: true
-status: "published"
+status: "draft"
 ---
 
 At first light, New York still reveals itself by water. Ferries cut clean lines across the harbor while cranes and converted warehouses mark the edges of a city once again renegotiating the terms of its growth.

@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/canal-district.png"
 imageAlt: "A renovated industrial district of brick buildings"
 featured: false
-status: "published"
+status: "draft"
 ---
 
 Thousands of profitable industrial businesses face the same constraint: an owner ready to retire and no clear successor. A growing group of younger operators sees opportunity in that demographic problem.

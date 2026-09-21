@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/market-desk.png"
 imageAlt: "Market analysts studying information at their desks"
 featured: false
-status: "published"
+status: "draft"
 ---
 
 For decades, infrastructure was treated as economic scenery: essential, expensive and largely invisible until something failed. That assumption no longer holds.

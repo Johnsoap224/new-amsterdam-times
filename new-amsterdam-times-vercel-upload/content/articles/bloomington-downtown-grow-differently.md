@@ -8,7 +8,7 @@ category: "Newsletter"
 image: ""
 imageAlt: ""
 featured: false
-status: "published"
+status: "draft"
 ---
 
 Downtown Bloomington has always carried more weight than its footprint suggests. It is a workplace, a gathering place and a shared front porch for a city whose identity is shaped by the university without being limited to it. That combination has long given the center of town an energy that feels larger than the map.

@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/manhattan-harbor.png"
 imageAlt: "The towers of Lower Manhattan across the harbor"
 featured: false
-status: "published"
+status: "draft"
 ---
 
 The office market is not disappearing. It is separating. Buildings with light, transit access and flexible floor plates are preserving demand while obsolete properties face a far less forgiving calculation.
