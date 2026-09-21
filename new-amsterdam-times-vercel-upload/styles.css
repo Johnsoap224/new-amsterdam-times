@@ -6,6 +6,7 @@
   --paper: #fff;
   --soft-paper: #f5f2ed;
   --accent: #1175a9;
+  --opinion: #a67b2d;
   --masthead: "Escrow Condensed", "Escrow Banner", Escrow, Georgia, "Times New Roman", serif;
   --serif: Georgia, "Times New Roman", Times, serif;
   --sans: Arial, Helvetica, sans-serif;
@@ -154,10 +155,10 @@ button, input { font: inherit; }
 }
 
 .story-kicker[data-category="opinion"] {
-  color: #d98f34;
+  color: var(--opinion);
 }
 
-body[data-page="opinion"] .interior-heading h1 { color: #A67B2D; }
+body[data-page="opinion"] .interior-heading h1 { color: var(--opinion); }
 
 .lead-grid {
   display: grid;
