@@ -149,17 +149,17 @@ async function subscribe(request) {
     await resendRequest("emails", {
       from: process.env.NEWSLETTER_FROM,
       to: [email],
-      subject: "Confirm your subscription to The Weekly Rapport",
+      subject: "Confirm your subscription to The New Amsterdam Times",
       ...(process.env.NEWSLETTER_REPLY_TO ? { reply_to: process.env.NEWSLETTER_REPLY_TO } : {}),
       html: `
         <div style="max-width:600px;margin:auto;padding:32px;color:#171717;font-family:Georgia,serif">
           <p style="font:700 12px Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#a67b2d">The New Amsterdam Times</p>
           <h1 style="font-size:36px;line-height:1.05">Confirm your subscription</h1>
-          <p style="font-size:18px;line-height:1.55">Click below to confirm that you want to receive The Weekly Rapport.</p>
+          <p style="font-size:18px;line-height:1.55">Click below to confirm that you want to receive The New Amsterdam Times.</p>
           <p style="margin:30px 0"><a href="${safeUrl}" style="display:inline-block;padding:13px 20px;color:#fff;background:#171717;text-decoration:none;font:700 14px Arial,sans-serif">Confirm subscription</a></p>
           <p style="color:#666;font-size:14px;line-height:1.45">This link expires in 24 hours. If you did not request this, you can ignore this email.</p>
         </div>`,
-      text: `Confirm your subscription to The Weekly Rapport: ${confirmationUrl}\n\nThis link expires in 24 hours. If you did not request this, ignore this email.`
+      text: `Confirm your subscription to The New Amsterdam Times: ${confirmationUrl}\n\nThis link expires in 24 hours. If you did not request this, ignore this email.`
     }, { idempotencyKey: `confirm-${tokenHash}` });
   } catch (error) {
     // Let the visitor retry immediately if the delivery provider rejected the email.
