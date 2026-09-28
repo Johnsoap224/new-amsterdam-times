@@ -6,6 +6,7 @@
   --paper: #fff;
   --soft-paper: #f5f2ed;
   --accent: #1175a9;
+  --orange: #d98f34;
   --opinion: #a67b2d;
   --masthead: "Escrow Condensed", "Escrow Banner", Escrow, Georgia, "Times New Roman", serif;
   --serif: Georgia, "Times New Roman", Times, serif;
@@ -47,23 +48,6 @@ button, input { font: inherit; }
 
 .skip-link:focus { top: 12px; }
 
-.notice-bar {
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 6px 20px;
-  color: white;
-  background: #222;
-  font: 700 11px/1.25 var(--sans);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-
-.notice-bar p { margin: 0; }
-.notice-bar a { color: white; border-bottom: 1px solid white; }
-
 .utility-row {
   min-height: 44px;
   display: grid;
@@ -76,7 +60,7 @@ button, input { font: inherit; }
 
 .today { margin: 0; justify-self: start; font-weight: 700; }
 .edition { margin: 0; justify-self: center; }
-.utility-subscribe { justify-self: end; font-weight: 700; color: #d98f34; }
+.utility-subscribe { justify-self: end; font-weight: 700; color: var(--orange); }
 .menu-button { display: none; border: 0; background: transparent; padding: 0; }
 
 .masthead {
@@ -158,6 +142,9 @@ button, input { font: inherit; }
   color: var(--opinion);
 }
 
+.story-kicker[data-category="articles"] { color: var(--orange); }
+
+body[data-page="articles"] .interior-heading h1 { color: var(--orange); }
 body[data-page="opinion"] .interior-heading h1 { color: var(--opinion); }
 
 .lead-grid {
@@ -285,8 +272,10 @@ body[data-page="opinion"] .interior-heading h1 { color: var(--opinion); }
 .article-meta { display: flex; justify-content: center; gap: 12px; color: var(--muted); font: 12px var(--sans); }
 .article-meta p { margin: 0; }
 .article-hero { margin: 0 0 38px; }
-.article-hero img { width: 100%; max-height: 650px; object-fit: cover; }
+.article-hero img { width: auto; max-width: 100%; height: auto; max-height: 650px; margin-inline: auto; object-fit: contain; }
 .article-hero figcaption { margin-top: 7px; color: #777; font: 10px/1.3 var(--sans); }
+.image--contain { background: var(--paper); }
+.image--contain img { object-fit: contain; }
 .article-body { max-width: 680px; margin: auto; font-size: 20px; line-height: 1.65; }
 .article-body p { margin: 0 0 24px; }
 .drop-cap::first-letter { float: left; margin: 11px 8px 0 0; font-size: 78px; line-height: .6; }
@@ -323,7 +312,6 @@ body[data-page="opinion"] .interior-heading h1 { color: var(--opinion); }
 
 @media (max-width: 640px) {
   .page-shell { width: min(calc(100% - 28px), var(--shell)); }
-  .notice-bar { justify-content: space-between; font-size: 9px; }
   .utility-row { grid-template-columns: 1fr 1fr; }
   .menu-button { display: block; justify-self: start; font: 700 12px var(--sans); cursor: pointer; }
   .today, .edition { display: none; }
