@@ -2,11 +2,21 @@
   "use strict";
 
   const allArticles = window.NAT_ARTICLES || [];
-  const articles = allArticles.filter((article) => article.status === "published");
+  const pageParameters = new URLSearchParams(window.location.search);
+  const previewAllowed = pageParameters.get("preview") === "1";
+  const previewSlug = pageParameters.get("slug");
+  const articles = allArticles.filter((article) => (
+    article.status === "published"
+    || (previewAllowed && article.status === "review" && (!previewSlug || article.slug === previewSlug))
+  ));
+  const categoryItems = [
+    { category: "Newsletter", label: "Newsletter", href: "newsletter.html", page: "newsletter" },
+    { category: "Articles", label: "Articles", href: "articles.html", page: "articles" },
+    { category: "Opinion", label: "Opinion", href: "opinion.html", page: "opinion" }
+  ];
   const navigationItems = [
     { label: "Home", href: "index.html", page: "home" },
-    { label: "Newsletter", href: "newsletter.html", page: "newsletter" },
-    { label: "Opinion", href: "opinion.html", page: "opinion" },
+    ...categoryItems,
     { label: "About", href: "about.html", page: "about" }
   ];
   const dateFormat = new Intl.DateTimeFormat("en-US", {
@@ -27,13 +37,18 @@
     "'": "&#39;",
     '"': "&quot;"
   })[character]);
-  const articleUrl = (article) => `article.html?slug=${encodeURIComponent(article.slug)}`;
+  const articleUrl = (article) => {
+    const previewQuery = previewAllowed && article.status === "review" ? "&preview=1" : "";
+    return `article.html?slug=${encodeURIComponent(article.slug)}${previewQuery}`;
+  };
   const storyTime = (article) => timeFormat.format(new Date(article.date));
-  const storyKicker = (article) => `<p class="story-kicker" data-category="${escapeHtml(article.category.toLowerCase())}">${escapeHtml(article.category)}</p>`;
+  const categoryKey = (category) => String(category).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const storyKicker = (article) => `<p class="story-kicker" data-category="${escapeHtml(categoryKey(article.category))}">${escapeHtml(article.category)}</p>`;
 
   function storyImage(article, className, loading = "eager") {
     if (!article.image) return "";
-    return `<a class="${className}" href="${articleUrl(article)}"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" loading="${loading}" /></a>`;
+    const fitClass = article.imageFit === "contain" ? " image--contain" : "";
+    return `<a class="${className}${fitClass}" href="${articleUrl(article)}"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" loading="${loading}" /></a>`;
   }
 
   function setSharedChrome() {
@@ -43,6 +58,9 @@
         const active = item.page === currentPage;
         return `<a${active ? ' class="active" aria-current="page"' : ""} href="${item.href}">${item.label}</a>`;
       }).join("");
+    });
+    document.querySelectorAll(".site-footer nav").forEach((node) => {
+      node.innerHTML = navigationItems.map((item) => `<a href="${item.href}">${item.label}</a>`).join("");
     });
 
     document.querySelectorAll("[data-current-date]").forEach((node) => {
@@ -120,7 +138,7 @@
       if (note) {
         note.className = `form-note ${subscriptionStatus === "confirmed" ? "form-note--success" : "form-note--error"}`;
         note.textContent = subscriptionStatus === "confirmed"
-          ? "Your subscription is confirmed. Welcome to The Weekly Rapport."
+          ? "Your subscription is confirmed. Welcome to The New Amsterdam Times."
           : "That confirmation link is invalid or has expired. Please subscribe again.";
       }
     }
@@ -241,7 +259,7 @@
         ${article.body.map((paragraph, index) => `<p${index === 0 ? ' class="drop-cap"' : ""}>${escapeHtml(paragraph)}</p>`).join("")}
       </div>
       <aside class="article-signup" aria-label="Newsletter signup">
-        <p class="eyebrow">The Weekly Rapport</p>
+        <p class="eyebrow">The New Amsterdam Times</p>
         <h2>Continue the conversation.</h2>
         <p>Receive our latest reporting and analysis every weekday.</p>
         <a href="index.html#subscribe">Subscribe to the newsletter</a>

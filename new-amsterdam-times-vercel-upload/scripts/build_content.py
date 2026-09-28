@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -14,8 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ARTICLE_DIR = ROOT / "content" / "articles"
 OUTPUT = ROOT / "content" / "articles.js"
+SERVER_OUTPUT = ROOT / "api" / "_articles-data.mjs"
 REQUIRED = ("title", "slug", "summary", "author", "date", "category", "status")
 VALID_STATUSES = {"draft", "review", "published"}
+VALID_CATEGORIES = {"Newsletter", "Articles", "Opinion"}
+SERVER_ONLY_FIELDS = {"emailSubject", "emailPreheader", "sendAt", "contentHash"}
 
 
 class ArticleError(ValueError):
@@ -64,6 +68,10 @@ def parse_article(path: Path) -> dict:
     if status not in VALID_STATUSES:
         raise ArticleError(f"status must be one of: {', '.join(sorted(VALID_STATUSES))}")
 
+    category = str(article["category"])
+    if category not in VALID_CATEGORIES:
+        raise ArticleError(f"category must be one of: {', '.join(sorted(VALID_CATEGORIES))}")
+
     try:
         datetime.fromisoformat(str(article["date"]).replace("Z", "+00:00"))
     except ValueError as exc:
@@ -80,6 +88,29 @@ def parse_article(path: Path) -> dict:
             raise ArticleError(f"image does not exist: {image}")
     article["image"] = image
     article["imageAlt"] = image_alt
+    image_fit = str(article.get("imageFit", "cover")).strip()
+    if image_fit not in {"cover", "contain"}:
+        raise ArticleError("imageFit must be cover or contain")
+    article["imageFit"] = image_fit
+
+    email_subject = str(article.get("emailSubject", article["title"])).strip()
+    email_preheader = str(article.get("emailPreheader", article["summary"])).strip()
+    if not email_subject:
+        raise ArticleError("emailSubject cannot be empty when provided")
+    if len(email_subject) > 160:
+        raise ArticleError("emailSubject must be 160 characters or fewer")
+    if len(email_preheader) > 250:
+        raise ArticleError("emailPreheader must be 250 characters or fewer")
+    article["emailSubject"] = email_subject
+    article["emailPreheader"] = email_preheader
+
+    send_at = str(article.get("sendAt", "")).strip()
+    if send_at:
+        try:
+            datetime.fromisoformat(send_at.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ArticleError("sendAt must be valid ISO format") from exc
+    article["sendAt"] = send_at
 
     paragraphs = [
         " ".join(block.splitlines()).strip()
@@ -89,6 +120,16 @@ def parse_article(path: Path) -> dict:
     if not paragraphs:
         raise ArticleError("article body cannot be empty")
     article["body"] = paragraphs
+    email_content = {
+        key: article[key]
+        for key in (
+            "title", "slug", "summary", "author", "date", "category", "image",
+            "imageAlt", "emailSubject", "emailPreheader", "body"
+        )
+    }
+    article["contentHash"] = hashlib.sha256(
+        json.dumps(email_content, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
     return article
 
 
@@ -121,7 +162,15 @@ def load_articles() -> list[dict]:
 
 
 def render_manifest(articles: list[dict]) -> str:
-    return "window.NAT_ARTICLES = " + json.dumps(articles, ensure_ascii=False, indent=2) + ";\n"
+    public_articles = [
+        {key: value for key, value in article.items() if key not in SERVER_ONLY_FIELDS}
+        for article in articles
+    ]
+    return "window.NAT_ARTICLES = " + json.dumps(public_articles, ensure_ascii=False, indent=2) + ";\n"
+
+
+def render_server_manifest(articles: list[dict]) -> str:
+    return "export default " + json.dumps(articles, ensure_ascii=False, indent=2) + ";\n"
 
 
 def main() -> int:
@@ -130,20 +179,33 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        rendered = render_manifest(load_articles())
+        articles = load_articles()
+        rendered = render_manifest(articles)
+        server_rendered = render_server_manifest(articles)
     except ArticleError as exc:
         print(f"Article validation failed:\n{exc}", file=sys.stderr)
         return 1
 
     if args.check:
-        if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != rendered:
-            print("Article validation passed, but content/articles.js is out of date.", file=sys.stderr)
+        outputs_current = (
+            OUTPUT.exists()
+            and OUTPUT.read_text(encoding="utf-8") == rendered
+            and SERVER_OUTPUT.exists()
+            and SERVER_OUTPUT.read_text(encoding="utf-8") == server_rendered
+        )
+        if not outputs_current:
+            print("Article validation passed, but generated article manifests are out of date.", file=sys.stderr)
             return 1
-        print("Article validation passed; the manifest is current.")
+        print("Article validation passed; both manifests are current.")
         return 0
 
     OUTPUT.write_text(rendered, encoding="utf-8")
-    print(f"Built {len(load_articles())} articles into {OUTPUT.relative_to(ROOT)}.")
+    SERVER_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    SERVER_OUTPUT.write_text(server_rendered, encoding="utf-8")
+    print(
+        f"Built {len(articles)} articles into {OUTPUT.relative_to(ROOT)} "
+        f"and {SERVER_OUTPUT.relative_to(ROOT)}."
+    )
     return 0
 
 

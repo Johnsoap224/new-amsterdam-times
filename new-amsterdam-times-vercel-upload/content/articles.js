@@ -1,5 +1,43 @@
 window.NAT_ARTICLES = [
   {
+    "title": "Welcome to the Newsletter",
+    "slug": "welcome-to-the-newsletter",
+    "summary": "What this Newsletter aims to do",
+    "author": "Chase Crawford",
+    "date": "2026-09-28T13:00:11-04:00",
+    "category": "Newsletter",
+    "image": "assets/images/newsletter-masthead.png",
+    "imageAlt": "The New Amsterdam Times masthead above the word Newsletter",
+    "imageFit": "contain",
+    "featured": true,
+    "status": "published",
+    "body": [
+      "If you search for a newsletter on the internet, you’ll find that most are outdated by months, with their most recent article being from 47 weeks ago, and that they all share the same ugly website design. But most importantly, all of them talk about topics that the Wall Street Journal covers. That is what I am trying to avoid with this Newsletter.",
+      "This Newsletter will be sent out every week and discuss a niche company that many of you may not have heard about. I will try to explore ways of discussing this company and inform you about where it is heading and what information you might need to know about its industry. I hope that you will find an experience different than any other you have had with different newsletters.",
+      "I hope you enjoy this project and I will see you in the first Newsletter.",
+      "-Chase Crawford"
+    ]
+  },
+  {
+    "title": "About the Paper",
+    "slug": "about-the-paper",
+    "summary": "An overview of what this paper is trying to achieve",
+    "author": "Chase Crawford",
+    "date": "2026-09-28T12:46:18-04:00",
+    "category": "Articles",
+    "image": "assets/images/new-amsterdam-times-newspaper.png",
+    "imageAlt": "The New Amsterdam Times masthead above the word Newspaper",
+    "imageFit": "contain",
+    "featured": false,
+    "status": "published",
+    "body": [
+      "On September 8th, 1664, the Dutch colony of New Amsterdam surrendered to the English along with the rest of the New Netherlands Colony without a fight. In 1665, honoring him with his Naval Victories, King Charles II named the lands after his brother James the Duke of York. Despite the name changes the former Dutch colony kept many of its old habits and continued to be a commercial hub in the area. In fact, Americas present day financial hub, Wall Street, is named after the wall that once occupied the street and marked the boundary of the colony.",
+      "But if you ask the average person they will not know any of this. Many have no idea that the Dutch were the first to colonize New Jersey and New York, long before the English. Yet it is these small details that have the largest impact on our present day history. If this colony was not founded would America be as worried about the Financial World as we are today?",
+      "The reason why this paper is called The New Amsterdam Times is to make sure that we pay attention to the small details. We will strive to find the complete story and always to look further in order to find that complete story.",
+      "I hope that you all enjoy the paper and if you would like to get involved let me know."
+    ]
+  },
+  {
     "title": "The Problem with Economic Thinking",
     "slug": "problem-with-economic-thinking",
     "summary": "Economic Behavior is often seen as the most important issue. It is actually subservient to the actual most important issue.",
@@ -10,6 +48,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "Seventeenth-century portrait of Cosimo II de' Medici in armor, flanked by two figures",
     "featured": false,
     "status": "published",
+    "imageFit": "cover",
     "body": [
       "If you have taken an Economics class or have listened to someone who describes themselves as an economic thinker, you have probably been told that they try to look at the world through an unbiased lens and instead just measure the world by data and economic theory derived from data. They will then give examples of how a certain economic policy would work in our world with comical examples, strung out to avoid the most amount of offense, watered down of all substance of the political so that by the end, the example is meaningless and is more metaphorical.",
       "Economist will go far and beyond to show that they are unbiased, and whenever you point out a bias that they might have, they will quickly try to hide behind the phrase, “all else being equal”. This criticism of their behavior is not trying to oust them or to destroy their world view but rather is made to show the appropriate cynicism needed to understand the problems with said thinking. The problem is not about whether or not their theories are incorrect, but rather the scope in which economic thinking is applied to the world. As such, all criticisms are trying to compel people into expanding their thought past the economical.",
@@ -33,6 +72,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "Downtown Bloomington has always carried more weight than its footprint suggests. It is a workplace, a gathering place and a shared front porch for a city whose identity is shaped by the university without being limited to it. That combination has long given the center of town an energy that feels larger than the map.",
       "But the economic bargain supporting American downtowns is changing. Office routines are less predictable, online commerce has altered the value of storefront traffic, and higher costs have made experimentation harder for independent businesses. The old formula—more workers, more visitors and steadily rising demand—can no longer be treated as automatic.",
@@ -53,6 +93,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "Lower Manhattan and New York Harbor at sunrise",
     "featured": true,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "At first light, New York still reveals itself by water. Ferries cut clean lines across the harbor while cranes and converted warehouses mark the edges of a city once again renegotiating the terms of its growth.",
       "The next chapter of that growth will not be written in a single business district. It is taking shape along the connected waterfronts of Brooklyn, Queens, New Jersey and Lower Manhattan, where housing, logistics, technology and public space now compete for the same scarce ground.",
@@ -70,6 +111,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "Analysts working at a financial market desk",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "The loudest trade is not always the most important one. Across public and private markets, investors are beginning to pay closer attention to the businesses that can fund their own ambitions.",
       "That shift sounds modest, but it changes the questions analysts ask. Growth remains valuable, though growth purchased with fragile financing now carries a more visible cost. Predictable margins and disciplined capital allocation have returned to the center of the conversation.",
@@ -87,6 +129,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "Brick warehouses under renovation beside a waterfront",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "Brick warehouses survive because they are useful twice. First they hold the machinery of an industrial economy; later they become the raw material of a service economy looking for authenticity.",
       "The latest wave of waterfront redevelopment promises safer streets, stronger tax bases and renewed public access. It also places pressure on the small manufacturers, artists and long-time residents who gave these districts their value before institutional capital arrived.",
@@ -104,6 +147,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "The towers of Lower Manhattan across the harbor",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "The office market is not disappearing. It is separating. Buildings with light, transit access and flexible floor plates are preserving demand while obsolete properties face a far less forgiving calculation.",
       "This divergence is turning a broad real-estate story into thousands of property-level negotiations. Lenders, owners and cities are all discovering that yesterday’s comparable sale offers little comfort when tomorrow’s use remains uncertain.",
@@ -121,6 +165,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "A renovated industrial district of brick buildings",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "Thousands of profitable industrial businesses face the same constraint: an owner ready to retire and no clear successor. A growing group of younger operators sees opportunity in that demographic problem.",
       "These acquisitions are rarely glamorous. The companies make specialized parts, maintain essential equipment and serve customers built over decades. Their resilience comes from knowledge that is difficult to reproduce quickly.",
@@ -138,6 +183,7 @@ window.NAT_ARTICLES = [
     "imageAlt": "Market analysts studying information at their desks",
     "featured": false,
     "status": "draft",
+    "imageFit": "cover",
     "body": [
       "For decades, infrastructure was treated as economic scenery: essential, expensive and largely invisible until something failed. That assumption no longer holds.",
       "Demand for computing power, resilient supply chains and electrification has made physical capacity a strategic advantage. Companies increasingly care not only about labor and taxes, but also about transmission lines, port depth and access to dependable energy.",
