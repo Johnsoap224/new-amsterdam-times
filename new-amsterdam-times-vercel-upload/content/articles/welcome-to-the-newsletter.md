@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/newsletter-masthead.png"
 imageAlt: "The New Amsterdam Times masthead above the word Newsletter"
 imageFit: "contain"
-featured: true
+featured: false
 status: "published"
 emailSubject: "Welcome to the Newsletter"
 emailPreheader: "What this Newsletter aims to do"
