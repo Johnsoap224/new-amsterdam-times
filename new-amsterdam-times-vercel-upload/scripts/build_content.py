@@ -18,7 +18,7 @@ OUTPUT = ROOT / "content" / "articles.js"
 SERVER_OUTPUT = ROOT / "api" / "_articles-data.mjs"
 REQUIRED = ("title", "slug", "summary", "author", "date", "category", "status")
 VALID_STATUSES = {"draft", "review", "published"}
-VALID_CATEGORIES = {"Newsletter", "Articles", "Opinion"}
+VALID_CATEGORIES = {"Newsletter", "Articles", "Editorial"}
 SERVER_ONLY_FIELDS = {"emailSubject", "emailPreheader", "sendAt", "contentHash"}
 
 
@@ -165,6 +165,7 @@ def render_manifest(articles: list[dict]) -> str:
     public_articles = [
         {key: value for key, value in article.items() if key not in SERVER_ONLY_FIELDS}
         for article in articles
+        if article["status"] == "published"
     ]
     return "window.NAT_ARTICLES = " + json.dumps(public_articles, ensure_ascii=False, indent=2) + ";\n"
 
