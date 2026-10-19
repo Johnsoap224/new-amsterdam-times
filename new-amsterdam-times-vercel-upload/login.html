@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Account — The New Amsterdam Times</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js" defer></script>
+    <script src="login.js" defer></script>
+  </head>
+  <body class="account-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="publisher-header">
+      <div class="page-shell publisher-header__inner">
+        <a class="publisher-mark" href="index.html">The New Amsterdam Times</a>
+        <span>Account</span>
+      </div>
+    </header>
+
+    <main class="account-shell" id="main-content">
+      <section class="account-card" aria-labelledby="account-title">
+        <header class="account-card__header">
+          <p class="eyebrow">The New Amsterdam Times</p>
+          <h1 id="account-title">Account</h1>
+          <p>Use your account to submit or publish articles.</p>
+        </header>
+
+        <div class="account-tabs" role="tablist" aria-label="Account options" data-account-tabs>
+          <button type="button" role="tab" aria-selected="true" data-mode="signin">Sign in</button>
+          <button type="button" role="tab" aria-selected="false" data-mode="signup">Create account</button>
+        </div>
+
+        <div class="account-oauth" data-account-oauth>
+          <button class="account-google-button" type="button" data-google-sign-in>
+            <span aria-hidden="true">G</span>
+            Continue with Google
+          </button>
+          <div class="account-divider" aria-hidden="true"><span>or</span></div>
+        </div>
+
+        <form class="account-form" data-auth-form="signin">
+          <label class="field">
+            <span>Email address</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button class="account-primary-button" type="submit">Sign in</button>
+          <button class="account-text-button" type="button" data-mode-link="forgot">Forgot your password?</button>
+        </form>
+
+        <form class="account-form" data-auth-form="signup" hidden>
+          <label class="field">
+            <span>Display name</span>
+            <input name="displayName" type="text" autocomplete="name" required maxlength="100" />
+          </label>
+          <label class="field">
+            <span>Email address</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input name="password" type="password" autocomplete="new-password" required minlength="8" />
+          </label>
+          <label class="field">
+            <span>Confirm password</span>
+            <input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" />
+          </label>
+          <button class="account-primary-button" type="submit">Create account</button>
+        </form>
+
+        <form class="account-form" data-auth-form="forgot" hidden>
+          <h2>Reset your password</h2>
+          <p>Enter your email address. We will send a secure reset link.</p>
+          <label class="field">
+            <span>Email address</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+          <button class="account-primary-button" type="submit">Send reset link</button>
+          <button class="account-text-button" type="button" data-mode-link="signin">Back to sign in</button>
+        </form>
+
+        <form class="account-form" data-auth-form="reset" hidden>
+          <h2>Set a new password</h2>
+          <label class="field">
+            <span>New password</span>
+            <input name="password" type="password" autocomplete="new-password" required minlength="8" />
+          </label>
+          <label class="field">
+            <span>Confirm password</span>
+            <input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" />
+          </label>
+          <button class="account-primary-button" type="submit">Save new password</button>
+        </form>
+
+        <div class="account-message" data-account-message aria-live="polite"></div>
+      </section>
+    </main>
+  </body>
+</html>

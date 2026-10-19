@@ -12,12 +12,13 @@
   const categoryItems = [
     { category: "Newsletter", label: "Newsletter", href: "newsletter.html", page: "newsletter" },
     { category: "Articles", label: "Articles", href: "articles.html", page: "articles" },
-    { category: "Opinion", label: "Opinion", href: "opinion.html", page: "opinion" }
+    { category: "Editorial", label: "Editorial", href: "opinion.html", page: "editorial" }
   ];
   const navigationItems = [
     { label: "Home", href: "index.html", page: "home" },
     ...categoryItems,
-    { label: "About", href: "about.html", page: "about" }
+    { label: "About", href: "about.html", page: "about" },
+    { label: "Account", href: "account.html", page: "account" }
   ];
   const dateFormat = new Intl.DateTimeFormat("en-US", {
     weekday: "long",

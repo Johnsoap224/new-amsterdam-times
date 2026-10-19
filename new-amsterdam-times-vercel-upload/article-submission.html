@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Article Submission — The New Amsterdam Times</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="auth.js" defer></script>
+    <script src="article-submission.js" defer></script>
+  </head>
+  <body class="publisher-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="publisher-header">
+      <div class="page-shell publisher-header__inner">
+        <a class="publisher-mark" href="index.html">The New Amsterdam Times</a>
+        <a href="account.html">Your Account</a>
+      </div>
+    </header>
+
+    <main class="publisher-shell" id="main-content">
+      <div data-auth-guard><p class="account-loading">Checking your account…</p></div>
+      <header class="publisher-intro" data-submission-content hidden>
+        <p class="eyebrow">Article submission</p>
+        <h1>Submit an article</h1>
+        <p>Paste the article text or select a document. Add the article details and a lead image before you submit it.</p>
+      </header>
+
+      <form class="publisher-form" data-publisher-form data-submission-content enctype="multipart/form-data" novalidate hidden>
+        <section class="publisher-card" aria-labelledby="article-text-heading">
+          <div class="publisher-card__heading">
+            <span>1</span>
+            <div>
+              <h2 id="article-text-heading">Article text</h2>
+              <p>Paste the complete article here, or select a document below.</p>
+            </div>
+          </div>
+
+          <label class="field field--wide">
+            <span>Paste article text</span>
+            <textarea name="body" rows="14" placeholder="Paste the complete article here…"></textarea>
+          </label>
+
+          <div class="field-divider" aria-hidden="true"><span>or</span></div>
+
+          <label class="upload-field" data-document-drop>
+            <input name="document" type="file" accept=".txt,.md,.markdown,.docx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+            <span class="upload-field__icon" aria-hidden="true">↑</span>
+            <strong>Select an article document</strong>
+            <small>Select a .txt, .md, or .docx file. Pasted text takes priority when both fields contain content.</small>
+            <em data-document-name>No document selected</em>
+          </label>
+        </section>
+
+        <section class="publisher-card" aria-labelledby="lead-image-heading">
+          <div class="publisher-card__heading">
+            <span>2</span>
+            <div>
+              <h2 id="lead-image-heading">Lead image</h2>
+              <p>Select a JPG, PNG, WebP, or GIF image smaller than 4 MB.</p>
+            </div>
+          </div>
+
+          <div class="image-upload-layout">
+            <label class="upload-field upload-field--image" data-image-drop>
+              <input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required />
+              <span class="upload-field__icon" aria-hidden="true">+</span>
+              <strong>Select a lead image</strong>
+              <small>JPG, PNG, WebP, or GIF. Maximum file size: 4 MB.</small>
+              <em data-image-name>No image selected</em>
+            </label>
+            <div class="image-preview" data-image-preview hidden>
+              <img alt="Selected lead image preview" />
+            </div>
+          </div>
+
+          <div class="publisher-grid publisher-grid--image">
+            <label class="field field--wide">
+              <span>Image description <b aria-hidden="true">*</b></span>
+              <input name="imageAlt" type="text" required maxlength="250" />
+              <small>Describe the image for readers who use a screen reader.</small>
+            </label>
+
+            <fieldset class="choice-group field--wide">
+              <legend>Image display</legend>
+              <label class="choice-card">
+                <input name="imageFit" type="radio" value="cover" checked />
+                <span><strong>Crop to fill</strong><small>Best for photographs.</small></span>
+              </label>
+              <label class="choice-card">
+                <input name="imageFit" type="radio" value="contain" />
+                <span><strong>Show the complete image</strong><small>Best for logos and graphics.</small></span>
+              </label>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="publisher-card" aria-labelledby="article-details-heading">
+          <div class="publisher-card__heading">
+            <span>3</span>
+            <div>
+              <h2 id="article-details-heading">Article details</h2>
+              <p>Complete each field before you submit the article.</p>
+            </div>
+          </div>
+
+          <div class="publisher-grid">
+            <label class="field field--wide">
+              <span>Headline <b aria-hidden="true">*</b></span>
+              <input name="title" type="text" required maxlength="180" autocomplete="off" />
+            </label>
+
+            <label class="field field--wide">
+              <span>Description <b aria-hidden="true">*</b></span>
+              <textarea name="summary" rows="3" required maxlength="400"></textarea>
+              <small>A short description that appears below the headline.</small>
+            </label>
+
+            <label class="field">
+              <span>Author <b aria-hidden="true">*</b></span>
+              <input name="author" type="text" required maxlength="100" autocomplete="name" />
+            </label>
+
+            <label class="field">
+              <span>Section <b aria-hidden="true">*</b></span>
+              <select name="category" required>
+                <option value="">Select a section</option>
+                <option value="Articles">Articles</option>
+                <option value="Editorial">Editorial</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <div class="publisher-submit">
+          <div class="publisher-status" data-publisher-status aria-live="polite"></div>
+          <button type="submit" data-submit-button>Submit article</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

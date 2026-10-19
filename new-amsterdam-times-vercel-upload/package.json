@@ -1,0 +1,8 @@
+{
+  "name": "new-amsterdam-times",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "mammoth": "^1.10.0"
+  }
+}
