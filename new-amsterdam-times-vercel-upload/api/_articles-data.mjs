@@ -82,7 +82,7 @@ export default [
     "summary": "Economic Behavior is often seen as the most important issue. It is actually subservient to the actual most important issue.",
     "author": "Chase Crawford",
     "date": "2026-09-21T15:10:04-04:00",
-    "category": "Opinion",
+    "category": "Editorial",
     "image": "assets/images/cosimo-ii-de-medici-and-two.jpg",
     "imageAlt": "Seventeenth-century portrait of Cosimo II de' Medici in armor, flanked by two figures",
     "featured": false,
@@ -102,7 +102,7 @@ export default [
       "This then explains a questions that Economists cannot answer: Why do people and groups want to succeed economically? Economists will list reasons, but said reasons can only be explained by someone’s wanting to be viewed favorably in a social light.",
       "That being said, do not discount Economists, they have realized many great facts about one of the most important aspects of social life. Just be cynical about their biases, specifically their bias to their way of thinking. If you have to pick between Keynes, Friedman, Marx and Machiavelli, just remember: only one of these authors didn’t publish their work to the masses."
     ],
-    "contentHash": "698e6d6aa5b7f1d778246e6690b6c9de67f78586b7871ec9d827636c76e2ac1c"
+    "contentHash": "42e88790967792b0796e54b25b0a106b810f44b0c22ed4d175126f7cbb81f615"
   },
   {
     "title": "Lumentum's Momentum",

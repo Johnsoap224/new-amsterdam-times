@@ -30,6 +30,36 @@ export function isAuthorized(request) {
     && constantTimeEqual(supplied, process.env.NEWSLETTER_ADMIN_SECRET);
 }
 
+export async function requireAccountRole(request, roles) {
+  const authorization = request.headers.get("authorization") || "";
+  const accessToken = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  if (!accessToken) {
+    return { authorized: false, status: 401, error: "Sign in to continue." };
+  }
+
+  const baseUrl = process.env.SUPABASE_URL.replace(/\/$/, "");
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const userResponse = await fetch(`${baseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: publishableKey,
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+  if (!userResponse.ok) {
+    return { authorized: false, status: 401, error: "Your session expired. Sign in again." };
+  }
+
+  const user = await userResponse.json();
+  const profiles = await supabaseRequest(
+    `profiles?id=eq.${encodeURIComponent(user.id)}&select=id,display_name,role&limit=1`
+  );
+  const profile = profiles?.[0];
+  if (!profile || !roles.includes(profile.role)) {
+    return { authorized: false, status: 403, error: "Your account cannot use this action.", user, profile };
+  }
+  return { authorized: true, user, profile };
+}
+
 export async function supabaseRequest(path, options = {}) {
   const secretKey = process.env.SUPABASE_SECRET_KEY;
   const response = await fetch(`${process.env.SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${path}`, {
