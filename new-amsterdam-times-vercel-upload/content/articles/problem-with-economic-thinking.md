@@ -4,7 +4,7 @@ slug: "problem-with-economic-thinking"
 summary: "Economic Behavior is often seen as the most important issue. It is actually subservient to the actual most important issue."
 author: "Chase Crawford"
 date: "2026-09-21T15:10:04-04:00"
-category: "Opinion"
+category: "Editorial"
 image: "assets/images/cosimo-ii-de-medici-and-two.jpg"
 imageAlt: "Seventeenth-century portrait of Cosimo II de' Medici in armor, flanked by two figures"
 featured: false
