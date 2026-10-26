@@ -249,8 +249,11 @@ body[data-page="editorial"] .interior-heading h1 { color: var(--editorial); }
 
 .interior-main { padding-top: 42px; padding-bottom: 70px; }
 .interior-heading { max-width: 760px; padding-bottom: 20px; border-bottom: 4px solid var(--ink); }
+body[data-page="articles"] .interior-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
 .interior-heading h1 { margin: 0; font-size: clamp(42px, 6vw, 70px); line-height: .95; letter-spacing: -.04em; }
 .interior-heading p { margin: 14px 0 0; color: var(--muted); font-size: 18px; line-height: 1.4; }
+.articles-submission-link { flex: 0 0 auto; padding: 12px 16px; color: white; background: var(--ink); font: 700 12px/1 var(--sans); }
+.articles-submission-link:hover { color: white; background: var(--accent); }
 .archive { max-width: 900px; }
 .archive-empty { margin: 32px 0 0; padding: 28px 0; border-block: 1px solid var(--rule); color: var(--muted); font-size: 19px; }
 .archive-story { display: grid; grid-template-columns: 260px 1fr; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--rule); }
@@ -802,9 +805,13 @@ body[data-page="editorial"] .interior-heading h1 { color: var(--editorial); }
   .primary-nav.nav-open { display: block; }
   .nav-inner { align-items: stretch; flex-direction: column; gap: 0; padding-block: 4px; }
   .nav-inner a { padding: 13px 0; border-bottom: 1px solid var(--light-rule); }
-  .nav-inner a:last-child { border: 0; }
+  .nav-dropdown { position: static; }
+  .nav-dropdown-menu { display: block; position: static; width: auto; padding: 0 0 0 16px; transform: none; border: 0; background: transparent; box-shadow: none; }
+  .nav-dropdown-menu a { font-size: 11px; }
+  .nav-inner > a:last-child { border: 0; }
   .nav-inner a.active::after { display: none; }
   .front-heading { padding-top: 23px; }
+  body[data-page="articles"] .interior-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
   .section-heading h1 { font-size: 18px; }
   .section-heading > p { display: none; }
   .lead-grid { display: flex; flex-direction: column; padding-top: 14px; }
