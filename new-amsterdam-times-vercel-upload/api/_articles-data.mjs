@@ -4,12 +4,12 @@ export default [
     "slug": "general-electric-vernova",
     "summary": "How are all these new AI systems being powered?",
     "author": "Chase Crawford",
-    "date": "2026-11-02T18:05:38.720Z",
-    "category": "Articles",
+    "date": "2026-11-02T18:15:41.410Z",
+    "category": "Newsletter",
     "image": "assets/images/general-electric-vernova.jpg",
     "imageAlt": "General Electric Vernova was created in 2024 as part of the General Electric split",
-    "featured": false,
-    "status": "review",
+    "featured": true,
+    "status": "published",
     "imageFit": "cover",
     "emailSubject": "General Electric Vernova",
     "emailPreheader": "How are all these new AI systems being powered?",
@@ -26,7 +26,7 @@ export default [
       "GEV’s outlook is positive. It has grown a lot over the past year and has many open contracts that will carry into the future. Although its debt increased after the acquisition of Prolec GE, the company still has plenty of cash, and its FCF suggests that this is unlikely to change. Overall, I would say this is a safe bet. Even if the AI market suddenly disappeared tomorrow, the company would not disappear with it. The main concern is its green energy division, which is still losing money. So, if you hear that the company may close it down, don’t panic you might even consider buying the stock.",
       "Thank you for reading this week’s Newsletter. Have a great week!"
     ],
-    "contentHash": "e5915e522c6624ae9de431af7bc72488939c7e7e8537b8c79040258bdabb1bc5"
+    "contentHash": "b7762123a2b89ffedae39b273f66af769e46a08ea0b31236343a2afe7f6c6880"
   },
   {
     "title": "t",
@@ -58,7 +58,7 @@ export default [
     "image": "assets/images/hpe-logo.jpg",
     "imageAlt": "Hewlett Packard Enterprise logo",
     "imageFit": "contain",
-    "featured": true,
+    "featured": false,
     "status": "published",
     "emailSubject": "Hewlett Packard, Enterprise",
     "emailPreheader": "Hewlett Packard Enterprise has performed well and it doesn't sell printers",

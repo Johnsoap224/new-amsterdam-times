@@ -3,13 +3,13 @@ title: "General Electric Vernova"
 slug: general-electric-vernova
 summary: "How are all these new AI systems being powered?"
 author: "Chase Crawford"
-date: 2026-11-02T18:05:38.720Z
-category: Articles
+date: 2026-11-02T18:15:41.410Z
+category: Newsletter
 image: "assets/images/general-electric-vernova.jpg"
 imageAlt: "General Electric Vernova was created in 2024 as part of the General Electric split"
 imageFit: cover
-featured: false
-status: review
+featured: true
+status: published
 emailSubject: "General Electric Vernova"
 emailPreheader: "How are all these new AI systems being powered?"
 ---

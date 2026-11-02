@@ -8,7 +8,7 @@ category: "Newsletter"
 image: "assets/images/hpe-logo.jpg"
 imageAlt: "Hewlett Packard Enterprise logo"
 imageFit: "contain"
-featured: true
+featured: false
 status: "published"
 emailSubject: "Hewlett Packard, Enterprise"
 emailPreheader: "Hewlett Packard Enterprise has performed well and it doesn't sell printers"
