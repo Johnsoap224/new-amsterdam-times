@@ -83,7 +83,7 @@ async function github(path, options = {}) {
 }
 
 async function getRepositoryFile(repository, path, branch) {
-  const result = await github(`/repos/${repository}/contents/${path}?ref=${encodeURIComponent(branch)}`);
+  const result = await github(`/repos/${repository}/contents/new-amsterdam-times-vercel-upload/${path}?ref=${encodeURIComponent(branch)}`);
   return Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
 }
 
@@ -137,16 +137,16 @@ async function publishArticle(slug, featured) {
     createBlob(repository, publicManifest),
     createBlob(repository, serverManifest)
   ]).then(([articleSha, publicSha, serverSha]) => [
-    { path: `content/articles/${slug}.md`, mode: "100644", type: "blob", sha: articleSha },
-    { path: "content/articles.js", mode: "100644", type: "blob", sha: publicSha },
-    { path: "api/_articles-data.mjs", mode: "100644", type: "blob", sha: serverSha }
+    { path: `new-amsterdam-times-vercel-upload/content/articles/${slug}.md`, mode: "100644", type: "blob", sha: articleSha },
+    { path: "new-amsterdam-times-vercel-upload/content/articles.js", mode: "100644", type: "blob", sha: publicSha },
+    { path: "new-amsterdam-times-vercel-upload/api/_articles-data.mjs", mode: "100644", type: "blob", sha: serverSha }
   ]);
 
   if (priorFeatured) {
     const oldMarkdown = await getRepositoryFile(repository, `content/articles/${priorFeatured.slug}.md`, branch);
     const updatedMarkdown = oldMarkdown.replace(/^featured:\s*true\s*$/m, "featured: false");
     entries.push({
-      path: `content/articles/${priorFeatured.slug}.md`,
+      path: `new-amsterdam-times-vercel-upload/content/articles/${priorFeatured.slug}.md`,
       mode: "100644",
       type: "blob",
       sha: await createBlob(repository, updatedMarkdown)
