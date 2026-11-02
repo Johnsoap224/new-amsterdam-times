@@ -654,6 +654,9 @@ body[data-page="articles"] .interior-heading { display: flex; align-items: flex-
   border-radius: 2px;
 }
 
+.review-section { margin-top: 32px; }
+.review-section > h2 { margin: 0; padding-bottom: 12px; border-bottom: 2px solid var(--ink); font-size: 25px; }
+
 .review-queue { display: grid; gap: 0; }
 
 .review-card {

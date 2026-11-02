@@ -23,11 +23,13 @@
   }
 
   let articles;
+  let publishedArticles;
   try {
     const response = await fetch("/api/review-articles", { headers: { Authorization: `Bearer ${account.session.access_token}` } });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "The review queue could not load.");
     articles = result.articles || [];
+    publishedArticles = result.publishedArticles || [];
   } catch (error) {
     root.innerHTML = `<div class="review-empty review-empty--missing"><h1>The review queue could not load.</h1><p>${escapeHtml(error.message)}</p></div>`;
     return;
@@ -38,7 +40,7 @@
   const articleUrl = (article) => `publish.html?slug=${encodeURIComponent(article.slug)}`;
 
   function renderQueue() {
-    const cards = articles.length ? articles.map((article) => `
+    const reviewCards = articles.map((article) => `
       <article class="review-card">
         ${article.image ? `<a class="review-card__image" href="${articleUrl(article)}"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" /></a>` : ""}
         <div class="review-card__copy">
@@ -48,8 +50,21 @@
           <p class="review-card__byline">By ${escapeHtml(article.author)} · ${escapeHtml(article.category)}</p>
           <a class="review-card__action" href="${articleUrl(article)}">Review article <span aria-hidden="true">→</span></a>
         </div>
-      </article>`).join("") : '<div class="review-empty"><p class="eyebrow">Queue clear</p><h2>No articles need review.</h2><p>New submissions will appear here after the website completes its next deployment.</p></div>';
-    root.innerHTML = `<header class="publisher-intro publishing-intro"><div><p class="eyebrow">Publishing Desk</p><h1>Submitted articles</h1><p>Review each submitted article before you publish it on the website.</p></div><a class="publisher-secondary-action" href="article-submission.html">New submission</a></header><section class="review-queue" aria-label="Articles waiting for review">${cards}</section>`;
+      </article>`).join("");
+    const publishedCards = publishedArticles.map((article) => `
+      <article class="review-card">
+        ${article.image ? `<a class="review-card__image" href="${articleUrl(article)}"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" /></a>` : ""}
+        <div class="review-card__copy">
+          <div class="review-card__meta"><span>Published</span><time datetime="${escapeHtml(article.date)}">${escapeHtml(dateFormat.format(new Date(article.date)))}</time></div>
+          <h2><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
+          <p>${escapeHtml(article.summary)}</p>
+          <p class="review-card__byline">By ${escapeHtml(article.author)} · ${escapeHtml(article.category)}</p>
+          <a class="review-card__action" href="${articleUrl(article)}">Manage article <span aria-hidden="true">→</span></a>
+        </div>
+      </article>`).join("");
+    const reviewContent = reviewCards || '<div class="review-empty"><h2>No articles need review.</h2><p>New submissions will appear here after the website completes its next deployment.</p></div>';
+    const publishedContent = publishedCards || '<div class="review-empty"><p>No published articles.</p></div>';
+    root.innerHTML = `<header class="publisher-intro publishing-intro"><div><p class="eyebrow">Publishing Desk</p><h1>Articles</h1><p>Review submissions or manage published articles.</p></div><a class="publisher-secondary-action" href="article-submission.html">New submission</a></header><section class="review-section" aria-labelledby="review-queue-title"><h2 id="review-queue-title">Submitted for review</h2><div class="review-queue" aria-label="Articles waiting for review">${reviewContent}</div></section><section class="review-section" aria-labelledby="published-articles-title"><h2 id="published-articles-title">Published articles</h2><div class="review-queue" aria-label="Published articles">${publishedContent}</div></section>`;
   }
 
   function renderDetail(article) {
@@ -185,11 +200,78 @@
     });
   }
 
+  function renderPublishedDetail(article) {
+    root.innerHTML = `
+      <div class="review-detail-nav"><a href="publish.html"><span aria-hidden="true">←</span> Back to articles</a></div>
+      <article class="review-detail">
+        <header class="review-detail__header"><p class="eyebrow">Published article</p><h1>${escapeHtml(article.title)}</h1><p class="review-detail__dek">${escapeHtml(article.summary)}</p>
+          <dl class="review-detail__facts"><div><dt>Author</dt><dd>${escapeHtml(article.author)}</dd></div><div><dt>Section</dt><dd>${escapeHtml(article.category)}</dd></div><div><dt>Published</dt><dd>${escapeHtml(dateFormat.format(new Date(article.date)))}</dd></div></dl>
+        </header>
+        ${article.image ? `<figure class="review-detail__image"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" /><figcaption>${escapeHtml(article.imageAlt)}</figcaption></figure>` : ""}
+        <div class="review-detail__body">${article.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}</div>
+      </article>
+      <aside class="publication-panel" aria-labelledby="unpublish-title">
+        <div><p class="eyebrow">Article management</p><h2 id="unpublish-title">Remove from the website</h2><p>This removes the article from the website and its archive. A newsletter email that was already sent cannot be recalled.</p></div>
+        <div class="publication-panel__submit"><p data-unpublish-status aria-live="polite"></p><button type="button" data-unpublish-article>Unpublish article</button></div>
+      </aside>`;
+
+    const status = root.querySelector("[data-unpublish-status]");
+    const button = root.querySelector("[data-unpublish-article]");
+
+    button.addEventListener("click", async () => {
+      if (!window.confirm(`Unpublish “${article.title}” and remove it from the website?`)) return;
+      button.disabled = true;
+      button.textContent = "Unpublishing…";
+      status.className = "publisher-status publisher-status--working";
+      status.textContent = "Sending the unpublish request…";
+      let removalQueued = false;
+      try {
+        const session = await window.NAT_AUTH.getSession();
+        if (!session) throw new Error("Your session expired. Sign in again.");
+        const response = await fetch("/api/release-article", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "unpublish", slug: article.slug })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "The article could not be unpublished.");
+        removalQueued = true;
+        status.textContent = "The article is being removed from the website…";
+
+        const deadline = Date.now() + 120000;
+        while (Date.now() < deadline) {
+          const queueResponse = await fetch("/api/review-articles", {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+            cache: "no-store"
+          });
+          const queue = await queueResponse.json();
+          if (!queueResponse.ok) throw new Error(queue.error || "The article status could not be checked.");
+          if (!(queue.publishedArticles || []).some((item) => item.slug === article.slug)) {
+            status.className = "publisher-status publisher-status--success";
+            status.textContent = "The article is no longer on the website.";
+            button.hidden = true;
+            return;
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 2000));
+        }
+        throw new Error("The deployment is still in progress.");
+      } catch (error) {
+        status.className = removalQueued ? "publisher-status publisher-status--working" : "publisher-status publisher-status--error";
+        status.textContent = removalQueued
+          ? `The unpublish request succeeded. ${error.message} Reload this page shortly.`
+          : error.message || "The article could not be unpublished.";
+        button.textContent = removalQueued ? "Unpublish requested" : "Unpublish article";
+        button.disabled = removalQueued;
+      }
+    });
+  }
+
   if (!selectedSlug) return renderQueue();
-  const article = articles.find((item) => item.slug === selectedSlug);
+  const article = [...articles, ...publishedArticles].find((item) => item.slug === selectedSlug);
   if (!article) {
     root.innerHTML = '<div class="review-empty review-empty--missing"><p class="eyebrow">Not available</p><h1>This article is not waiting for review.</h1><a class="review-card__action" href="publish.html">Back to submitted articles</a></div>';
     return;
   }
+  if (article.status === "published") return renderPublishedDetail(article);
   renderDetail(article);
 }());
