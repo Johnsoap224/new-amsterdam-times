@@ -64,7 +64,7 @@
       </article>
       <aside class="publication-panel" aria-labelledby="publication-settings-title">
         <div><p class="eyebrow">Final approval</p><h2 id="publication-settings-title">Publication settings</h2><p>Publishing makes this article public on the website. It does not send an email to subscribers.</p></div>
-        <form data-publication-form><label class="check-field"><input name="featured" type="checkbox" /><span><strong>Feature this article on the home page</strong><small>This article will replace the current featured article.</small></span></label><div class="publication-panel__submit"><p data-publication-status aria-live="polite"></p><button type="submit">Publish article</button></div></form>
+        <form data-publication-form><label class="field"><span>Publish in</span><select name="category" required><option value="Articles" ${article.category === "Articles" ? "selected" : ""}>Articles</option><option value="Newsletter" ${article.category === "Newsletter" ? "selected" : ""}>Newsletter</option><option value="Editorial" ${article.category === "Editorial" ? "selected" : ""}>Editorial</option></select></label><label class="check-field"><input name="featured" type="checkbox" /><span><strong>Feature this article on the home page</strong><small>This article will replace the current featured article.</small></span></label><div class="publication-panel__submit"><p data-publication-status aria-live="polite"></p><button type="submit">Publish article</button></div></form>
       </aside>`;
 
     const form = root.querySelector("[data-publication-form]");
@@ -83,7 +83,7 @@
         const response = await fetch("/api/release-article", {
           method: "POST",
           headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ slug: article.slug, featured: data.get("featured") === "on" })
+          body: JSON.stringify({ slug: article.slug, category: data.get("category"), featured: data.get("featured") === "on" })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "The article publication failed.");
