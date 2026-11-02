@@ -4,6 +4,7 @@ import {
   isAuthorized,
   json,
   missingEnvironment,
+  requireAccountRole,
   resendRequest,
   supabaseRequest
 } from "./_services.mjs";
@@ -12,10 +13,10 @@ const MODES = new Set(["test", "send", "schedule"]);
 const REQUIRED_ENVIRONMENT = [
   "SUPABASE_URL",
   "SUPABASE_SECRET_KEY",
+  "SUPABASE_PUBLISHABLE_KEY",
   "RESEND_API_KEY",
   "RESEND_SEGMENT_ID",
   "NEWSLETTER_FROM",
-  "NEWSLETTER_ADMIN_SECRET",
   "PUBLIC_SITE_URL"
 ];
 
@@ -78,7 +79,13 @@ async function updateSend(id, changes) {
 
 async function handleRequest(request) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
-  if (!isAuthorized(request)) return json({ error: "Unauthorized." }, 401);
+  if (!isAuthorized(request)) {
+    const account = await requireAccountRole(request, ["editor", "admin"]);
+    if (!account.authorized) {
+      const error = account.status === 403 ? "Only editors and administrators can send newsletters." : account.error;
+      return json({ error }, account.status);
+    }
+  }
 
   let body;
   try {
