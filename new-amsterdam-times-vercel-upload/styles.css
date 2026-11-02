@@ -146,7 +146,7 @@ button, input, select, textarea { font: inherit; }
 
 .story-kicker[data-category="articles"] { color: var(--orange); }
 
-body[data-page="articles"] .interior-heading h1 { color: var(--orange); }
+body[data-page="articles"] .interior-heading h1 { color: var(--ink); }
 body[data-page="editorial"] .interior-heading h1 { color: var(--editorial); }
 
 .lead-grid {
