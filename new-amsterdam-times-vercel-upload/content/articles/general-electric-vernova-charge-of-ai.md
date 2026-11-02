@@ -3,13 +3,13 @@ title: "General Electric Vernova Charge of AI"
 slug: general-electric-vernova-charge-of-ai
 summary: "How are all these new AI systems being powered?"
 author: "Chase Crawford"
-date: 2026-11-02T18:54:11.371Z
-category: Articles
+date: 2026-11-02T18:55:09.880Z
+category: Newsletter
 image: "assets/images/general-electric-vernova-charge-of-ai.jpg"
 imageAlt: "General Electric Vernova was created in 2024 as part of the General Electric split"
 imageFit: cover
-featured: false
-status: review
+featured: true
+status: published
 emailSubject: "General Electric Vernova Charge of AI"
 emailPreheader: "How are all these new AI systems being powered?"
 ---

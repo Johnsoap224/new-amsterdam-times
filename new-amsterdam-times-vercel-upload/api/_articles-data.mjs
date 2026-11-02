@@ -4,12 +4,12 @@ export default [
     "slug": "general-electric-vernova-charge-of-ai",
     "summary": "How are all these new AI systems being powered?",
     "author": "Chase Crawford",
-    "date": "2026-11-02T18:54:11.371Z",
-    "category": "Articles",
+    "date": "2026-11-02T18:55:09.880Z",
+    "category": "Newsletter",
     "image": "assets/images/general-electric-vernova-charge-of-ai.jpg",
     "imageAlt": "General Electric Vernova was created in 2024 as part of the General Electric split",
-    "featured": false,
-    "status": "review",
+    "featured": true,
+    "status": "published",
     "imageFit": "cover",
     "emailSubject": "General Electric Vernova Charge of AI",
     "emailPreheader": "How are all these new AI systems being powered?",
@@ -26,7 +26,7 @@ export default [
       "GEV’s outlook is positive. It has grown a lot over the past year and has many open contracts that will carry into the future. Although its debt increased after the acquisition of Prolec GE, the company still has plenty of cash, and its FCF suggests that this is unlikely to change. Overall, I would say this is a safe bet. Even if the AI market suddenly disappeared tomorrow, the company would not disappear with it. The main concern is its green energy division, which is still losing money. So, if you hear that the company may close it down, don’t panic you might even consider buying the stock.",
       "Thank you for reading this week’s Newsletter. Have a great week!"
     ],
-    "contentHash": "d952285fc3f94b1236282c3a267690dbb40b21b4d805819e6c2d1421e2efabbc"
+    "contentHash": "d0204c4a0a1f8be230f259093e04b5ef51942ac85268a4b273e626785ad0464f"
   },
   {
     "title": "General Electric Vernova",
