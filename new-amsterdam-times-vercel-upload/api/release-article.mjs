@@ -95,7 +95,7 @@ async function createBlob(repository, content) {
   return result.sha;
 }
 
-async function publishArticle(slug, featured) {
+async function publishArticle(slug, category, featured) {
   const repository = process.env.PUBLISH_GITHUB_REPOSITORY;
   const branch = process.env.PUBLISH_GITHUB_BRANCH;
   const [reference, publicSource, serverSource] = await Promise.all([
@@ -112,6 +112,9 @@ async function publishArticle(slug, featured) {
   if (!serverArticle || serverArticle.status !== "review") {
     throw Object.assign(new Error("This article is not waiting for review."), { status: 409 });
   }
+  if (!["Articles", "Newsletter", "Editorial"].includes(category)) {
+    throw Object.assign(new Error("Select a valid publication section."), { status: 400 });
+  }
 
   const priorFeatured = featured
     ? serverArticles.find((article) => article.featured && article.status === "published")
@@ -122,6 +125,7 @@ async function publishArticle(slug, featured) {
   }
 
   serverArticle.status = "published";
+  serverArticle.category = category;
   serverArticle.featured = featured;
   serverArticle.date = new Date().toISOString();
   serverArticle.contentHash = contentHash(serverArticle);
@@ -189,7 +193,9 @@ async function handleRequest(request) {
   const slug = String(body.slug || "").trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return json({ error: "Select a valid article." }, 400);
 
-  const result = await publishArticle(slug, body.featured === true);
+  const category = String(body.category || "").trim();
+
+  const result = await publishArticle(slug, category, body.featured === true);
   const baseUrl = process.env.PUBLIC_SITE_URL.replace(/\/$/, "");
   return json({
     message: "The article is queued for publication.",
