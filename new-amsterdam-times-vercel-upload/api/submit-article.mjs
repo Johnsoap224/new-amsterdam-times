@@ -218,7 +218,7 @@ async function commitArticle(article, imageBuffer, imageExtension) {
 
 async function handleRequest(request) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
-  const account = await requireAccountRole(request, ["contributor", "editor"]);
+  const account = await requireAccountRole(request, ["contributor", "editor", "admin"]);
   if (!account.authorized) return json({ error: account.error }, account.status);
 
   const form = await request.formData();
