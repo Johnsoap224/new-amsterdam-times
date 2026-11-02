@@ -768,6 +768,7 @@ body[data-page="articles"] .interior-heading { display: flex; align-items: flex-
   cursor: pointer;
 }
 .publication-panel__submit button:disabled { opacity: .6; cursor: wait; }
+.publication-panel__submit [data-newsletter-retry] { padding: 12px 16px; border: 1px solid var(--ink); border-radius: 2px; color: var(--ink); background: var(--paper); font: 700 12px/1 var(--sans); cursor: pointer; }
 
 .sr-only {
   position: absolute;

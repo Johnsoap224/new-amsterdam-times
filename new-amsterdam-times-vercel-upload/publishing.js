@@ -63,13 +63,78 @@
         <div class="review-detail__body">${article.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}</div>
       </article>
       <aside class="publication-panel" aria-labelledby="publication-settings-title">
-        <div><p class="eyebrow">Final approval</p><h2 id="publication-settings-title">Publication settings</h2><p>Publishing makes this article public on the website. It does not send an email to subscribers.</p></div>
-        <form data-publication-form><label class="field"><span>Publish in</span><select name="category" required><option value="Articles" ${article.category === "Articles" ? "selected" : ""}>Articles</option><option value="Newsletter" ${article.category === "Newsletter" ? "selected" : ""}>Newsletter</option><option value="Editorial" ${article.category === "Editorial" ? "selected" : ""}>Editorial</option></select></label><label class="check-field"><input name="featured" type="checkbox" /><span><strong>Feature this article on the home page</strong><small>This article will replace the current featured article.</small></span></label><div class="publication-panel__submit"><p data-publication-status aria-live="polite"></p><button type="submit">Publish article</button></div></form>
+        <div><p class="eyebrow">Final approval</p><h2 id="publication-settings-title">Publication settings</h2><p>Choosing Newsletter publishes the article to the website, then emails the subscriber list after the deployment is ready. Articles and Editorial publish to the website only.</p></div>
+        <form data-publication-form><label class="field"><span>Publish in</span><select name="category" required><option value="Articles" ${article.category === "Articles" ? "selected" : ""}>Articles</option><option value="Newsletter" ${article.category === "Newsletter" ? "selected" : ""}>Newsletter</option><option value="Editorial" ${article.category === "Editorial" ? "selected" : ""}>Editorial</option></select></label><label class="check-field"><input name="featured" type="checkbox" /><span><strong>Feature this article on the home page</strong><small>This article will replace the current featured article.</small></span></label><div class="publication-panel__submit"><p data-publication-status aria-live="polite"></p><button type="submit">Publish article</button><button type="button" data-newsletter-retry hidden>Retry newsletter send</button></div></form>
       </aside>`;
 
     const form = root.querySelector("[data-publication-form]");
     const status = root.querySelector("[data-publication-status]");
     const button = form.querySelector("button[type='submit']");
+    const retryButton = form.querySelector("[data-newsletter-retry]");
+    let publishedArticleUrl = "";
+    let newsletterAccessToken = "";
+
+    async function waitForArticleDeployment(accessToken) {
+      const deadline = Date.now() + 120000;
+      while (Date.now() < deadline) {
+        let response;
+        try {
+          response = await fetch("/api/review-articles", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            cache: "no-store"
+          });
+        } catch {
+          await new Promise((resolve) => window.setTimeout(resolve, 2000));
+          continue;
+        }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "The article queue could not be checked.");
+        if (!(result.articles || []).some((item) => item.slug === article.slug)) return;
+        await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      }
+      throw new Error("The article is published, but its deployment is still in progress. The newsletter has not been sent.");
+    }
+
+    async function sendNewsletter() {
+      retryButton.disabled = true;
+      status.className = "publisher-status publisher-status--working";
+      status.textContent = "Waiting for the article deployment before emailing subscribers…";
+      try {
+        await waitForArticleDeployment(newsletterAccessToken);
+        const response = await fetch("/api/newsletter", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${newsletterAccessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "send", slug: article.slug })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          const alreadySent = response.status === 409 && /status: (queued|sent|scheduled)/i.test(result.error || "");
+          if (!alreadySent) throw new Error(result.error || "The newsletter could not be sent.");
+        }
+        retryButton.hidden = true;
+        status.className = "publisher-status publisher-status--success";
+        status.textContent = response.ok ? "The article is live and the newsletter is queued for subscribers." : "The newsletter was already queued for subscribers.";
+      } catch (error) {
+        status.className = "publisher-status publisher-status--error";
+        status.textContent = `The article is live, but the newsletter was not sent: ${error.message}`;
+        retryButton.hidden = false;
+        retryButton.disabled = false;
+      }
+    }
+
+    retryButton.addEventListener("click", async () => {
+      try {
+        const session = await window.NAT_AUTH.getSession();
+        if (!session) throw new Error("Your session expired. Sign in again.");
+        newsletterAccessToken = session.access_token;
+        await sendNewsletter();
+      } catch (error) {
+        status.className = "publisher-status publisher-status--error";
+        status.textContent = error.message || "The newsletter could not be sent.";
+        retryButton.disabled = false;
+      }
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const data = new FormData(form);
@@ -87,6 +152,15 @@
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "The article publication failed.");
+        publishedArticleUrl = result.articleUrl;
+        if (data.get("category") === "Newsletter") {
+          newsletterAccessToken = session.access_token;
+          button.textContent = "Article published";
+          await sendNewsletter();
+          return;
+        }
+        button.textContent = "Article published";
+        button.disabled = true;
         status.className = "publisher-status publisher-status--success";
         status.replaceChildren(document.createTextNode("The article is queued for publication. Open it after the new deployment completes. "));
         const link = document.createElement("a");
@@ -94,6 +168,15 @@
         link.textContent = "Open article";
         status.append(link);
       } catch (error) {
+        if (publishedArticleUrl) {
+          button.textContent = "Article published";
+          button.disabled = true;
+          status.className = "publisher-status publisher-status--error";
+          status.textContent = `The article is live, but the newsletter was not sent: ${error.message}`;
+          retryButton.hidden = false;
+          retryButton.disabled = false;
+          return;
+        }
         status.className = "publisher-status publisher-status--error";
         status.textContent = error.message || "The article publication failed.";
         button.disabled = false;
