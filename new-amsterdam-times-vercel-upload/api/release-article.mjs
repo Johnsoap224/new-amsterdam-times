@@ -10,6 +10,11 @@ const REQUIRED_ENVIRONMENT = [
   "SUPABASE_SECRET_KEY",
   "SUPABASE_PUBLISHABLE_KEY"
 ];
+const SITE_ROOT = "new-amsterdam-times-vercel-upload";
+
+function repositoryPath(path) {
+  return `${SITE_ROOT}/${path}`;
+}
 
 function yamlString(value) {
   return JSON.stringify(String(value || "").trim());
@@ -83,7 +88,7 @@ async function github(path, options = {}) {
 }
 
 async function getRepositoryFile(repository, path, branch) {
-  const result = await github(`/repos/${repository}/contents/new-amsterdam-times-vercel-upload/${path}?ref=${encodeURIComponent(branch)}`);
+  const result = await github(`/repos/${repository}/contents/${repositoryPath(path)}?ref=${encodeURIComponent(branch)}`);
   return Buffer.from(result.content.replace(/\n/g, ""), "base64").toString("utf8");
 }
 
@@ -141,16 +146,16 @@ async function publishArticle(slug, category, featured) {
     createBlob(repository, publicManifest),
     createBlob(repository, serverManifest)
   ]).then(([articleSha, publicSha, serverSha]) => [
-    { path: `new-amsterdam-times-vercel-upload/content/articles/${slug}.md`, mode: "100644", type: "blob", sha: articleSha },
-    { path: "new-amsterdam-times-vercel-upload/content/articles.js", mode: "100644", type: "blob", sha: publicSha },
-    { path: "new-amsterdam-times-vercel-upload/api/_articles-data.mjs", mode: "100644", type: "blob", sha: serverSha }
+    { path: repositoryPath(`content/articles/${slug}.md`), mode: "100644", type: "blob", sha: articleSha },
+    { path: repositoryPath("content/articles.js"), mode: "100644", type: "blob", sha: publicSha },
+    { path: repositoryPath("api/_articles-data.mjs"), mode: "100644", type: "blob", sha: serverSha }
   ]);
 
   if (priorFeatured) {
     const oldMarkdown = await getRepositoryFile(repository, `content/articles/${priorFeatured.slug}.md`, branch);
     const updatedMarkdown = oldMarkdown.replace(/^featured:\s*true\s*$/m, "featured: false");
     entries.push({
-      path: `new-amsterdam-times-vercel-upload/content/articles/${priorFeatured.slug}.md`,
+      path: repositoryPath(`content/articles/${priorFeatured.slug}.md`),
       mode: "100644",
       type: "blob",
       sha: await createBlob(repository, updatedMarkdown)
@@ -176,11 +181,64 @@ async function publishArticle(slug, category, featured) {
   return { article: serverArticle, commitSha: newCommit.sha };
 }
 
+async function unpublishArticle(slug) {
+  const repository = process.env.PUBLISH_GITHUB_REPOSITORY;
+  const branch = process.env.PUBLISH_GITHUB_BRANCH;
+  const [reference, publicSource, serverSource] = await Promise.all([
+    github(`/repos/${repository}/git/ref/heads/${encodeURIComponent(branch)}`),
+    getRepositoryFile(repository, "content/articles.js", branch),
+    getRepositoryFile(repository, "api/_articles-data.mjs", branch)
+  ]);
+  const currentCommit = await github(`/repos/${repository}/git/commits/${reference.object.sha}`);
+  const publicArticles = parseManifest(publicSource, "window.NAT_ARTICLES = ", ";");
+  const serverArticles = parseManifest(serverSource, "export default ", ";");
+  const serverArticle = serverArticles.find((article) => article.slug === slug);
+  const publicIndex = publicArticles.findIndex((article) => article.slug === slug);
+
+  if (!serverArticle || serverArticle.status !== "published" || publicIndex < 0) {
+    throw Object.assign(new Error("This article is not published."), { status: 409 });
+  }
+
+  serverArticle.status = "draft";
+  serverArticle.featured = false;
+  publicArticles.splice(publicIndex, 1);
+  const publicManifest = `window.NAT_ARTICLES = ${JSON.stringify(publicArticles, null, 2)};\n`;
+  const serverManifest = `export default ${JSON.stringify(serverArticles, null, 2)};\n`;
+  const [articleSha, publicSha, serverSha] = await Promise.all([
+    createBlob(repository, renderMarkdown(serverArticle)),
+    createBlob(repository, publicManifest),
+    createBlob(repository, serverManifest)
+  ]);
+  const entries = [
+    { path: repositoryPath(`content/articles/${slug}.md`), mode: "100644", type: "blob", sha: articleSha },
+    { path: repositoryPath("content/articles.js"), mode: "100644", type: "blob", sha: publicSha },
+    { path: repositoryPath("api/_articles-data.mjs"), mode: "100644", type: "blob", sha: serverSha }
+  ];
+
+  const tree = await github(`/repos/${repository}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({ base_tree: currentCommit.tree.sha, tree: entries })
+  });
+  const newCommit = await github(`/repos/${repository}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({
+      message: `Unpublish: ${serverArticle.title}`,
+      tree: tree.sha,
+      parents: [reference.object.sha]
+    })
+  });
+  await github(`/repos/${repository}/git/refs/heads/${encodeURIComponent(branch)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: newCommit.sha, force: false })
+  });
+  return { article: serverArticle, commitSha: newCommit.sha };
+}
+
 async function handleRequest(request) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   const account = await requireAccountRole(request, ["editor", "admin"]);
   if (!account.authorized) {
-    const error = account.status === 403 ? "Only editors and administrators can publish articles." : account.error;
+    const error = account.status === 403 ? "Only editors and administrators can manage articles." : account.error;
     return json({ error }, account.status);
   }
 
@@ -192,6 +250,16 @@ async function handleRequest(request) {
   }
   const slug = String(body.slug || "").trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return json({ error: "Select a valid article." }, 400);
+  const action = String(body.action || "publish").trim();
+
+  if (action === "unpublish") {
+    const result = await unpublishArticle(slug);
+    return json({
+      message: "The article is queued for removal from the website.",
+      commitSha: result.commitSha
+    });
+  }
+  if (action !== "publish") return json({ error: "Select a valid article action." }, 400);
 
   const category = String(body.category || "").trim();
 
@@ -214,7 +282,7 @@ export default {
     try {
       return await handleRequest(request);
     } catch (error) {
-      console.error("Article publication failed", error);
+      console.error("Article release request failed", error);
       const exposed = error.status && error.status < 500;
       return json({ error: exposed ? error.message : "The article publication failed." }, error.status || 500);
     }
