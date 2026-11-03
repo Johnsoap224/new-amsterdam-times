@@ -17,7 +17,7 @@ ARTICLE_DIR = ROOT / "content" / "articles"
 OUTPUT = ROOT / "content" / "articles.js"
 SERVER_OUTPUT = ROOT / "api" / "_articles-data.mjs"
 REQUIRED = ("title", "slug", "summary", "author", "date", "category", "status")
-VALID_STATUSES = {"draft", "review", "published"}
+VALID_STATUSES = {"draft", "review", "published", "rejected"}
 VALID_CATEGORIES = {"Newsletter", "Articles", "Editorial"}
 SERVER_ONLY_FIELDS = {"emailSubject", "emailPreheader", "sendAt", "contentHash"}
 
@@ -112,14 +112,32 @@ def parse_article(path: Path) -> dict:
             raise ArticleError("sendAt must be valid ISO format") from exc
     article["sendAt"] = send_at
 
-    paragraphs = [
-        " ".join(block.splitlines()).strip()
-        for block in re.split(r"\n\s*\n", body_text.strip())
-        if block.strip()
-    ]
-    if not paragraphs:
+    body = []
+    for block in re.split(r"\n\s*\n", body_text.strip()):
+        if not block.strip():
+            continue
+        image = re.fullmatch(r"!\[(.*?)\]\(([^)]+)\)", block.strip())
+        if image:
+            alt, source = image.groups()
+            image_path = ROOT / source.lstrip("/")
+            if not alt.strip() or not image_path.is_file():
+                raise ArticleError(f"inline image is missing alt text or file: {source}")
+            body.append({"type": "image", "src": source, "alt": alt.strip()})
+        else:
+            heading = re.fullmatch(r"(#{1,6})\s+(.+)", block.strip())
+            if heading:
+                body.append({"type": "heading", "level": len(heading.group(1)), "text": heading.group(2).strip()})
+                continue
+            list_item = re.fullmatch(r"([-*+]\s+|\d+[.)]\s+)(.+)", block.strip())
+            if list_item:
+                body.append({"type": "list-item", "ordered": list_item.group(1)[0].isdigit(), "text": list_item.group(2).strip()})
+                continue
+            paragraph = " ".join(block.splitlines()).strip()
+            if paragraph:
+                body.append(paragraph)
+    if not body:
         raise ArticleError("article body cannot be empty")
-    article["body"] = paragraphs
+    article["body"] = body
     email_content = {
         key: article[key]
         for key in (
