@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "mammoth": "^1.10.0"
+    "mammoth": "^1.10.0",
+    "pdf-parse": "2.4.5"
   }
 }
