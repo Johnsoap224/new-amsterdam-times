@@ -87,7 +87,7 @@
     }
   });
 
-  configureDropZone("[data-document-drop]", documentInput, (file) => /\.(txt|md|markdown|docx)$/i.test(file.name));
+  configureDropZone("[data-document-drop]", documentInput, (file) => /\.(txt|md|markdown|docx|pdf)$/i.test(file.name));
   configureDropZone("[data-image-drop]", imageInput, (file) => /^image\/(jpeg|png|webp|gif)$/.test(file.type));
 
   form.addEventListener("submit", async (event) => {

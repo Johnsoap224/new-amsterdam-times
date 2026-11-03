@@ -242,6 +242,19 @@
     const articleHero = article.image
       ? `<figure class="article-hero"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" /><figcaption>${escapeHtml(article.imageAlt)}.</figcaption></figure>`
       : "";
+    const articleText = article.body.map((block, index) => {
+      if (typeof block !== "string" && block?.type === "image") {
+        return `<figure class="article-inline-image"><img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt)}" loading="lazy" /></figure>`;
+      }
+      if (typeof block !== "string" && block?.type === "heading") {
+        const level = Math.min(6, Math.max(2, Number(block.level) || 2));
+        return `<h${level}>${escapeHtml(block.text)}</h${level}>`;
+      }
+      if (typeof block !== "string" && block?.type === "list-item") {
+        return `<p class="article-list-item">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
+      }
+      return `<p${index === 0 ? ' class="drop-cap"' : ""}>${escapeHtml(block)}</p>`;
+    }).join("");
 
     document.title = `${article.title} — The New Amsterdam Times`;
     root.innerHTML = `
@@ -256,9 +269,7 @@
         </div>
       </header>
       ${articleHero}
-      <div class="article-body">
-        ${article.body.map((paragraph, index) => `<p${index === 0 ? ' class="drop-cap"' : ""}>${escapeHtml(paragraph)}</p>`).join("")}
-      </div>
+      <div class="article-body">${articleText}</div>
       <aside class="article-signup" aria-label="Newsletter signup">
         <p class="eyebrow">The New Amsterdam Times</p>
         <h2>Continue the conversation.</h2>
