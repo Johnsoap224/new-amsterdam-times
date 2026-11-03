@@ -34,6 +34,10 @@ export default {
         publishedArticles: articles
           .filter((article) => article.status === "published")
           .sort((left, right) => right.date.localeCompare(left.date))
+          .map(reviewArticle),
+        rejectedArticles: articles
+          .filter((article) => article.status === "rejected")
+          .sort((left, right) => right.date.localeCompare(left.date))
           .map(reviewArticle)
       });
     } catch (error) {

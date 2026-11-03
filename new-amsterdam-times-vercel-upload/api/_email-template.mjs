@@ -45,8 +45,19 @@ export function renderNewsletter(article, { test = false } = {}) {
   const imageUrl = absoluteImageUrl(article);
   const unsubscribeUrl = test ? canonicalUrl : "{{{RESEND_UNSUBSCRIBE_URL}}}";
   const preheader = article.emailPreheader || article.summary;
-  const bodyHtml = article.body.map((paragraph) => `
-    <p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${escapeHtml(paragraph)}</p>`).join("");
+  const bodyHtml = article.body.map((block) => {
+    if (typeof block !== "string" && block?.type === "image") {
+      const imageUrl = new URL(block.src.replace(/^\//, ""), siteUrl()).toString();
+      return `<p style="margin:0 0 22px;"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(block.alt)}" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;" /></p>`;
+    }
+    if (typeof block !== "string" && block?.type === "heading") {
+      return `<h2 style="margin:30px 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:25px;line-height:1.2;color:#171717;">${escapeHtml(block.text)}</h2>`;
+    }
+    if (typeof block !== "string" && block?.type === "list-item") {
+      return `<p style="margin:0 0 12px 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#222222;">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
+    }
+    return `<p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${escapeHtml(block)}</p>`;
+  }).join("");
   const imageHtml = imageUrl ? `
     <tr><td style="padding:0 0 28px;">
       <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(article.imageAlt)}" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;" />
@@ -96,7 +107,13 @@ export function renderNewsletter(article, { test = false } = {}) {
     article.summary,
     `By ${article.author} · ${formattedDate(article.date)}`,
     "",
-    ...article.body.flatMap((paragraph) => [paragraph, ""]),
+    ...article.body.flatMap((block) => {
+      if (typeof block === "string") return [block, ""];
+      if (block?.type === "image") return [`[Image: ${block.alt}]`, ""];
+      if (block?.type === "heading") return [block.text, ""];
+      if (block?.type === "list-item") return [`${block.ordered ? "1." : "•"} ${block.text}`, ""];
+      return [String(block?.text || ""), ""];
+    }),
     `Read this article online: ${canonicalUrl}`,
     "",
     "You are receiving this because you confirmed a subscription to The New Amsterdam Times.",

@@ -20,6 +20,14 @@ function yamlString(value) {
   return JSON.stringify(String(value || "").trim());
 }
 
+function bodyBlockMarkdown(block) {
+  if (typeof block === "string") return block;
+  if (block.type === "image") return `![${block.alt}](${block.src})`;
+  if (block.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
+  if (block.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;
+  return String(block.text || "");
+}
+
 function parseManifest(source, prefix, suffix) {
   if (!source.startsWith(prefix) || !source.trimEnd().endsWith(suffix)) {
     throw new Error("The article list has an unsupported format.");
@@ -46,9 +54,17 @@ function renderMarkdown(article) {
     `emailPreheader: ${yamlString(article.emailPreheader)}`,
     "---",
     "",
-    article.body.join("\n\n"),
+    article.body.map(bodyBlockMarkdown).join("\n\n"),
     ""
   ].join("\n");
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return value.map(canonicalJson);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalJson(value[key])]));
+  }
+  return value;
 }
 
 function contentHash(article) {
@@ -57,8 +73,98 @@ function contentHash(article) {
     "title", "slug", "summary", "author", "date", "category", "image",
     "imageAlt", "emailSubject", "emailPreheader", "body"
   ].forEach((key) => { emailContent[key] = article[key]; });
-  const stable = JSON.stringify(emailContent, Object.keys(emailContent).sort());
+  const stable = JSON.stringify(canonicalJson(emailContent));
   return createHash("sha256").update(stable, "utf8").digest("hex");
+}
+
+function parseEditedBody(value, originalBody) {
+  const allowedImages = new Set(originalBody.filter((block) => block && typeof block === "object" && block.type === "image").map((block) => block.src));
+  const body = [];
+  for (const rawBlock of String(value || "").trim().split(/\n\s*\n/)) {
+    const block = rawBlock.trim();
+    if (!block) continue;
+    const image = block.match(/^!\[(.*?)\]\(([^)]+)\)$/);
+    if (image) {
+      if (!allowedImages.has(image[2])) throw Object.assign(new Error("Keep inline images from this article or remove them."), { status: 400 });
+      body.push({ type: "image", src: image[2], alt: image[1].trim() });
+      continue;
+    }
+    const heading = block.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      body.push({ type: "heading", level: heading[1].length, text: heading[2].trim() });
+      continue;
+    }
+    const listItem = block.match(/^([-*+]\s+|\d+[.)]\s+)(.+)$/);
+    if (listItem) {
+      body.push({ type: "list-item", ordered: /^\d/.test(listItem[1]), text: listItem[2].trim() });
+      continue;
+    }
+    body.push(block.replace(/\s*\n\s*/g, " "));
+  }
+  if (!body.length) throw Object.assign(new Error("Add article text before saving."), { status: 400 });
+  return body;
+}
+
+async function updateReviewArticle(slug, changes) {
+  const repository = process.env.PUBLISH_GITHUB_REPOSITORY;
+  const branch = process.env.PUBLISH_GITHUB_BRANCH;
+  const [reference, serverSource] = await Promise.all([
+    github(`/repos/${repository}/git/ref/heads/${encodeURIComponent(branch)}`),
+    getRepositoryFile(repository, "api/_articles-data.mjs", branch)
+  ]);
+  const currentCommit = await github(`/repos/${repository}/git/commits/${reference.object.sha}`);
+  const serverArticles = parseManifest(serverSource, "export default ", ";");
+  const article = serverArticles.find((item) => item.slug === slug);
+  if (!article || article.status !== "review") {
+    throw Object.assign(new Error("This article is not waiting for review."), { status: 409 });
+  }
+
+  const title = String(changes.title || "").trim();
+  const summary = String(changes.summary || "").trim();
+  const author = String(changes.author || "").trim();
+  const imageAlt = String(changes.imageAlt || "").trim();
+  if (!title || title.length > 180 || !summary || summary.length > 400 || !author || author.length > 100 || !imageAlt || imageAlt.length > 250) {
+    throw Object.assign(new Error("Complete each field and stay within its character limit."), { status: 400 });
+  }
+  if (typeof changes.body !== "string" || changes.body.length > 50000) {
+    throw Object.assign(new Error("Enter article text under 50,000 characters."), { status: 400 });
+  }
+
+  const oldTitle = article.title;
+  const oldSummary = article.summary;
+  article.title = title;
+  article.summary = summary;
+  article.author = author;
+  article.imageAlt = imageAlt;
+  article.body = parseEditedBody(changes.body, article.body);
+  if (article.emailSubject === oldTitle) article.emailSubject = title;
+  if (article.emailPreheader === oldSummary) article.emailPreheader = summary;
+  article.contentHash = contentHash(article);
+
+  const serverManifest = `export default ${JSON.stringify(serverArticles, null, 2)};\n`;
+  const [articleSha, serverSha] = await Promise.all([
+    createBlob(repository, renderMarkdown(article)),
+    createBlob(repository, serverManifest)
+  ]);
+  const tree = await github(`/repos/${repository}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({
+      base_tree: currentCommit.tree.sha,
+      tree: [
+        { path: repositoryPath(`content/articles/${slug}.md`), mode: "100644", type: "blob", sha: articleSha },
+        { path: repositoryPath("api/_articles-data.mjs"), mode: "100644", type: "blob", sha: serverSha }
+      ]
+    })
+  });
+  const newCommit = await github(`/repos/${repository}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({ message: `Edit review article: ${article.title}`, tree: tree.sha, parents: [reference.object.sha] })
+  });
+  await github(`/repos/${repository}/git/refs/heads/${encodeURIComponent(branch)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: newCommit.sha, force: false })
+  });
+  return { article, commitSha: newCommit.sha };
 }
 
 function publicArticle(article) {
@@ -234,6 +340,55 @@ async function unpublishArticle(slug) {
   return { article: serverArticle, commitSha: newCommit.sha };
 }
 
+async function rejectArticle(slug) {
+  const repository = process.env.PUBLISH_GITHUB_REPOSITORY;
+  const branch = process.env.PUBLISH_GITHUB_BRANCH;
+  const [reference, publicSource, serverSource] = await Promise.all([
+    github(`/repos/${repository}/git/ref/heads/${encodeURIComponent(branch)}`),
+    getRepositoryFile(repository, "content/articles.js", branch),
+    getRepositoryFile(repository, "api/_articles-data.mjs", branch)
+  ]);
+  const currentCommit = await github(`/repos/${repository}/git/commits/${reference.object.sha}`);
+  const publicArticles = parseManifest(publicSource, "window.NAT_ARTICLES = ", ";");
+  const serverArticles = parseManifest(serverSource, "export default ", ";");
+  const article = serverArticles.find((item) => item.slug === slug);
+  if (!article || article.status !== "review") {
+    throw Object.assign(new Error("This article is not waiting for review."), { status: 409 });
+  }
+
+  article.status = "rejected";
+  article.featured = false;
+  const publicIndex = publicArticles.findIndex((item) => item.slug === slug);
+  if (publicIndex >= 0) publicArticles.splice(publicIndex, 1);
+  const publicManifest = `window.NAT_ARTICLES = ${JSON.stringify(publicArticles, null, 2)};\n`;
+  const serverManifest = `export default ${JSON.stringify(serverArticles, null, 2)};\n`;
+  const [articleSha, publicSha, serverSha] = await Promise.all([
+    createBlob(repository, renderMarkdown(article)),
+    createBlob(repository, publicManifest),
+    createBlob(repository, serverManifest)
+  ]);
+  const tree = await github(`/repos/${repository}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({
+      base_tree: currentCommit.tree.sha,
+      tree: [
+        { path: repositoryPath(`content/articles/${slug}.md`), mode: "100644", type: "blob", sha: articleSha },
+        { path: repositoryPath("content/articles.js"), mode: "100644", type: "blob", sha: publicSha },
+        { path: repositoryPath("api/_articles-data.mjs"), mode: "100644", type: "blob", sha: serverSha }
+      ]
+    })
+  });
+  const newCommit = await github(`/repos/${repository}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({ message: `Reject submission: ${article.title}`, tree: tree.sha, parents: [reference.object.sha] })
+  });
+  await github(`/repos/${repository}/git/refs/heads/${encodeURIComponent(branch)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: newCommit.sha, force: false })
+  });
+  return { article, commitSha: newCommit.sha };
+}
+
 async function handleRequest(request) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
   const account = await requireAccountRole(request, ["editor", "admin"]);
@@ -252,12 +407,21 @@ async function handleRequest(request) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return json({ error: "Select a valid article." }, 400);
   const action = String(body.action || "publish").trim();
 
+  if (action === "edit") {
+    const result = await updateReviewArticle(slug, body.article || {});
+    return json({ message: "The article edits are saved.", commitSha: result.commitSha, article: publicArticle(result.article) });
+  }
+
   if (action === "unpublish") {
     const result = await unpublishArticle(slug);
     return json({
       message: "The article is queued for removal from the website.",
       commitSha: result.commitSha
     });
+  }
+  if (action === "reject") {
+    const result = await rejectArticle(slug);
+    return json({ message: "The article submission is rejected.", commitSha: result.commitSha });
   }
   if (action !== "publish") return json({ error: "Select a valid article action." }, 400);
 
