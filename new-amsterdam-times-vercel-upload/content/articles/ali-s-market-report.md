@@ -9,7 +9,7 @@ image: "assets/images/ali-s-market-report.png"
 imageAlt: "Alphabet's Falling Down"
 imageFit: cover
 featured: false
-status: review
+status: rejected
 emailSubject: "y"
 emailPreheader: "y"
 ---

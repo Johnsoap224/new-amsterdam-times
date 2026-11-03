@@ -9,7 +9,7 @@ export default [
     "image": "assets/images/ali-s-market-report.png",
     "imageAlt": "Alphabet's Falling Down",
     "featured": false,
-    "status": "review",
+    "status": "rejected",
     "imageFit": "cover",
     "emailSubject": "y",
     "emailPreheader": "y",
