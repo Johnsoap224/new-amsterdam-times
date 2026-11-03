@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import mammoth from "mammoth";
+import { CanvasFactory } from "pdf-parse/worker";
 import { PDFParse } from "pdf-parse";
 import { json, missingEnvironment, requireAccountRole } from "./_services.mjs";
 
@@ -181,7 +182,7 @@ async function readDocument(file) {
     if (!buffer.subarray(0, 5).equals(Buffer.from("%PDF-"))) {
       throw Object.assign(new Error("The selected file is not a valid PDF."), { status: 400 });
     }
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+    const parser = new PDFParse({ data: new Uint8Array(buffer), CanvasFactory });
     try {
       const [textResult, imageResult] = await Promise.all([
         parser.getText({ lineEnforce: true }),
