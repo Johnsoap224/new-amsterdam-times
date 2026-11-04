@@ -253,6 +253,10 @@
       if (typeof block !== "string" && block?.type === "list-item") {
         return `<p class="article-list-item">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
       }
+      if (typeof block !== "string" && block?.type === "table" && Array.isArray(block.rows)) {
+        const [header, ...rows] = block.rows;
+        return `<div class="article-table-scroll" role="region" aria-label="Article data table" tabindex="0"><table class="article-data-table"><thead><tr>${header.map((cell) => `<th scope="col">${escapeHtml(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${header.map((_, column) => `<td data-label="${escapeHtml(header[column])}">${escapeHtml(row[column] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+      }
       return `<p${index === 0 ? ' class="drop-cap"' : ""}>${escapeHtml(block)}</p>`;
     }).join("");
 
