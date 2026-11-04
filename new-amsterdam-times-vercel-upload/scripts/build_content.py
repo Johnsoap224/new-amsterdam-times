@@ -116,6 +116,14 @@ def parse_article(path: Path) -> dict:
     for block in re.split(r"\n\s*\n", body_text.strip()):
         if not block.strip():
             continue
+        lines = [line.strip() for line in block.splitlines()]
+        if len(lines) >= 2 and all(re.fullmatch(r"\|.*\|", line) for line in lines):
+            rows = [[cell.strip().replace(r"\|", "|") for cell in line[1:-1].split("|")] for line in lines]
+            divider = lambda row: bool(row) and all(re.fullmatch(r":?-{3,}:?", cell) for cell in row)
+            rows = [row for row in rows if not divider(row)]
+            if rows:
+                body.append({"type": "table", "rows": rows})
+            continue
         image = re.fullmatch(r"!\[(.*?)\]\(([^)]+)\)", block.strip())
         if image:
             alt, source = image.groups()
