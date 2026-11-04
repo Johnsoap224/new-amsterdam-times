@@ -57,7 +57,29 @@ function bodyBlockMarkdown(block) {
   if (block.type === "image") return `![${block.alt}](${block.src})`;
   if (block.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
   if (block.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;
+  if (block.type === "table" && Array.isArray(block.rows)) {
+    return block.rows.map((row) => `| ${row.map((cell) => String(cell || "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ")).join(" | ")} |`).join("\n");
+  }
   return String(block.text || "");
+}
+
+function cleanTableRows(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .map((row) => (Array.isArray(row) ? row.map((cell) => String(cell || "").replace(/\s+/g, " ").trim()) : []))
+    .filter((row) => row.some(Boolean));
+}
+
+function removeTableLines(text, tables) {
+  const tableRows = (tables || []).flat().map((row) => row.map((cell) => String(cell || "").replace(/\s+/g, " ").trim()).filter(Boolean)).filter((row) => row.length > 1);
+  if (!tableRows.length) return text;
+  return String(text || "").split("\n").filter((line) => {
+    const normalized = line.toLocaleLowerCase().replace(/[^\p{L}\p{N}%+.,()$-]+/gu, " ").trim();
+    if (!normalized) return true;
+    return !tableRows.some((row) => {
+      const cells = row.map((cell) => cell.toLocaleLowerCase().replace(/[^\p{L}\p{N}%+.,()$-]+/gu, " ").trim()).filter((cell) => cell.length > 1);
+      return cells.length > 1 && cells.every((cell) => normalized.includes(cell));
+    });
+  }).join("\n");
 }
 
 function parseParagraphs(value) {
@@ -184,21 +206,24 @@ async function readDocument(file) {
     }
     const parser = new PDFParse({ data: new Uint8Array(buffer), CanvasFactory });
     try {
-      const [textResult, imageResult] = await Promise.all([
+      const [textResult, imageResult, tableResult] = await Promise.all([
         parser.getText({ lineEnforce: true }),
-        parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false })
+        parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false }),
+        parser.getTable()
       ]);
       if (textResult.total > MAX_PDF_PAGES) {
         throw Object.assign(new Error(`Select a PDF with ${MAX_PDF_PAGES} pages or fewer.`), { status: 400 });
       }
       const imagesByPage = new Map(imageResult.pages.map((page) => [page.pageNumber, page.images]));
+      const tablesByPage = new Map(tableResult.pages.map((page) => [page.num, page.tables.map(cleanTableRows).filter((rows) => rows.length)]));
       let imageCount = 0;
       let imageBytes = 0;
       const pages = textResult.pages.map((page) => {
         const images = imagesByPage.get(page.num) || [];
         imageCount += images.length;
         imageBytes += images.reduce((total, image) => total + image.data.length, 0);
-        return { num: page.num, text: page.text, images };
+        const tables = tablesByPage.get(page.num) || [];
+        return { num: page.num, text: removeTableLines(page.text, tables), images, tables };
       });
       if (imageCount > MAX_PDF_IMAGES || imageBytes > MAX_PDF_IMAGE_BYTES) {
         throw Object.assign(new Error("This PDF contains too many or too-large images to convert. Reduce its images and submit it again."), { status: 400 });
@@ -393,6 +418,9 @@ async function handleRequest(request) {
   let imageNumber = 0;
   for (const page of document.pages) {
     if (!pastedBody) body.push(...parseParagraphs(page.text));
+    if (!pastedBody) {
+      for (const rows of page.tables || []) body.push({ type: "table", rows });
+    }
     for (const image of page.images) {
       imageNumber += 1;
       const path = `assets/articles/${slug}-image-${imageNumber}.png`;

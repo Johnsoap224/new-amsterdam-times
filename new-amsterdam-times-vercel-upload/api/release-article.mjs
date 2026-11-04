@@ -25,6 +25,9 @@ function bodyBlockMarkdown(block) {
   if (block.type === "image") return `![${block.alt}](${block.src})`;
   if (block.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
   if (block.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;
+  if (block.type === "table" && Array.isArray(block.rows)) {
+    return block.rows.map((row) => `| ${row.map((cell) => String(cell || "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ")).join(" | ")} |`).join("\n");
+  }
   return String(block.text || "");
 }
 
@@ -83,6 +86,14 @@ function parseEditedBody(value, originalBody) {
   for (const rawBlock of String(value || "").trim().split(/\n\s*\n/)) {
     const block = rawBlock.trim();
     if (!block) continue;
+    const tableLines = block.split("\n").map((line) => line.trim());
+    if (tableLines.length >= 2 && tableLines.every((line) => /^\|.*\|$/.test(line))) {
+      const rows = tableLines.map((line) => line.slice(1, -1).split(/(?<!\\)\|/).map((cell) => cell.replace(/\\\|/g, "|").trim()));
+      const isDivider = (row) => row.length > 0 && row.every((cell) => /^:?-{3,}:?$/.test(cell));
+      const filteredRows = rows.filter((row) => !isDivider(row));
+      if (filteredRows.length) body.push({ type: "table", rows: filteredRows });
+      continue;
+    }
     const image = block.match(/^!\[(.*?)\]\(([^)]+)\)$/);
     if (image) {
       if (!allowedImages.has(image[2])) throw Object.assign(new Error("Keep inline images from this article or remove them."), { status: 400 });

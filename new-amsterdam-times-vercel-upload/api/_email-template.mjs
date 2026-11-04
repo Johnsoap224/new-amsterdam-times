@@ -56,6 +56,12 @@ export function renderNewsletter(article, { test = false } = {}) {
     if (typeof block !== "string" && block?.type === "list-item") {
       return `<p style="margin:0 0 12px 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#222222;">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
     }
+    if (typeof block !== "string" && block?.type === "table" && Array.isArray(block.rows)) {
+      const [header, ...rows] = block.rows;
+      const heading = `<thead><tr>${header.map((cell) => `<th align="left" style="padding:10px 8px;border-bottom:2px solid #173f5f;font:700 13px Arial,sans-serif;color:#173f5f;">${escapeHtml(cell)}</th>`).join("")}</tr></thead>`;
+      const body = rows.map((row) => `<tr>${header.map((_, index) => `<td valign="top" style="padding:9px 8px;border-bottom:1px solid #d8d4cb;font:14px/1.45 Arial,sans-serif;color:#222222;">${escapeHtml(row[index] || "")}</td>`).join("")}</tr>`).join("");
+      return `<div style="margin:24px 0;overflow-x:auto;"><table role="table" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">${heading}<tbody>${body}</tbody></table></div>`;
+    }
     return `<p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${escapeHtml(block)}</p>`;
   }).join("");
   const imageHtml = imageUrl ? `
@@ -112,6 +118,7 @@ export function renderNewsletter(article, { test = false } = {}) {
       if (block?.type === "image") return [`[Image: ${block.alt}]`, ""];
       if (block?.type === "heading") return [block.text, ""];
       if (block?.type === "list-item") return [`${block.ordered ? "1." : "•"} ${block.text}`, ""];
+      if (block?.type === "table" && Array.isArray(block.rows)) return block.rows.map((row) => row.join(" | ")).concat("");
       return [String(block?.text || ""), ""];
     }),
     `Read this article online: ${canonicalUrl}`,
