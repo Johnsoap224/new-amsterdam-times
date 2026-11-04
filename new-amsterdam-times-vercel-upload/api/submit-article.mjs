@@ -206,10 +206,8 @@ async function readDocument(file) {
     }
     const parser = new PDFParse({ data: new Uint8Array(buffer), CanvasFactory });
     try {
-      const [textResult, imageResult] = await Promise.all([
-        parser.getText({ lineEnforce: true }),
-        parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false })
-      ]);
+      const textResult = await parser.getText({ lineEnforce: true });
+      const imageResult = await parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false });
       let tableResult = { pages: [] };
       try {
         tableResult = await parser.getTable();
@@ -236,6 +234,7 @@ async function readDocument(file) {
       return { text: textResult.text, pages, blocks: [], images: [] };
     } catch (error) {
       if (error.status) throw error;
+      console.error("PDF conversion failed during text, image, or table processing.", error);
       throw Object.assign(new Error("The PDF could not be converted. Try a text-based PDF or paste the article text."), { status: 400 });
     } finally {
       await parser.destroy();
