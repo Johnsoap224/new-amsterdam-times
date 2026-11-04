@@ -206,11 +206,16 @@ async function readDocument(file) {
     }
     const parser = new PDFParse({ data: new Uint8Array(buffer), CanvasFactory });
     try {
-      const [textResult, imageResult, tableResult] = await Promise.all([
+      const [textResult, imageResult] = await Promise.all([
         parser.getText({ lineEnforce: true }),
-        parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false }),
-        parser.getTable()
+        parser.getImage({ imageThreshold: 0, imageBuffer: true, imageDataUrl: false })
       ]);
+      let tableResult = { pages: [] };
+      try {
+        tableResult = await parser.getTable();
+      } catch (error) {
+        console.warn("PDF table detection failed; importing text and images only.", error);
+      }
       if (textResult.total > MAX_PDF_PAGES) {
         throw Object.assign(new Error(`Select a PDF with ${MAX_PDF_PAGES} pages or fewer.`), { status: 400 });
       }
