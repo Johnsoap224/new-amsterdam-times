@@ -4,13 +4,13 @@ export default [
     "slug": "ali-s-market-report",
     "summary": "Show Me the Money",
     "author": "Ali Kanji",
-    "date": "2026-11-03T15:05:20.995Z",
+    "date": "2026-11-06T17:14:40.261Z",
     "category": "Articles",
     "image": "assets/images/ali-s-market-report.png",
     "imageAlt": "Alphabet's Falling Down",
     "imageFit": "cover",
     "featured": false,
-    "status": "review",
+    "status": "published",
     "emailSubject": "Ali's Market Report",
     "emailPreheader": "Show Me the Money",
     "sendAt": "",
@@ -383,7 +383,7 @@ export default [
       "Best,",
       "Ali Kanji"
     ],
-    "contentHash": "589b99cf9bc1b0f264f4231f70bc462337a445f7e00bfbefb9a4d8dd11116dbf"
+    "contentHash": "7f085d867130850f76f30b5b7607a974df99d9803aa52d7f7c8dbca202040a38"
   },
   {
     "title": "General Electric Vernova Charge of AI",

@@ -3,13 +3,13 @@ title: "Ali's Market Report"
 slug: ali-s-market-report
 summary: "Show Me the Money"
 author: "Ali Kanji"
-date: 2026-11-03T15:05:20.995Z
+date: 2026-11-06T17:14:40.261Z
 category: Articles
 image: "assets/images/ali-s-market-report.png"
 imageAlt: "Alphabet's Falling Down"
 imageFit: cover
 featured: false
-status: review
+status: published
 emailSubject: "Ali's Market Report"
 emailPreheader: "Show Me the Money"
 ---
@@ -35,7 +35,6 @@ FCF = Cash from operations (on the statement of cash flows) – capex
 Weekly change = Friday Oct 30 close vs. Friday Oct 23 close. Rates are the level and the change in basis points (bps; 1 bp = 0.01%). Year-to-date (YTD) is filled only where a source stated it; "about" means the figure comes from a weekly recap rather than two exact settles, or is my own arithmetic from two sourced levels.
 
 | **Asset** | Friday close | Week change | YTD change | One-line note |
-| --- | ---: | ---: | ---: | --- |
 | **S&P 500 (SPX)** | 7,580.07 | -0.6% | +10.7% | Third straight weekly loss; Friday's -1.8% was the worst day since June |
 | **Nasdaq Composite** | 25,437.00 | -2.0% | +9.4% | -2.9% Friday; October was its worst month since March 2025 (-5.3%) |
 | **Dow Jones Industrial Average (DJIA)** | 51,770.31 | -0.9% | +7.7% | Held up better; only 7 of 30 stocks fell Thursday |
@@ -64,7 +63,6 @@ The Nasdaq posted a third straight weekly loss, and a -5.3% October, its worst m
 Big week: the Fed decision, first look at Q3 GDP (Gross Domestic Product), and the Fed's favorite inflation gauge all landed within 48 hours. Times are ET. "Beat" or "miss" is actual vs. forecast.
 
 | **Day** | Event | Actual | Forecast | Previous | Read |
-| --- | --- | ---: | ---: | ---: | --- |
 | **Tue Oct 27** | US Durable Goods Orders m/m (Sep) | 1.8% | 2.0% | -0.1% | Slight headline miss but best since April; core orders +0.5% on top of +1.6% in Aug |
 | **Tue Oct 27** | US CB Consumer Confidence (Oct) | 91.7 | 80.4 | 84.2 (rev.) | Big beat; consumers still spending |
 | **Tue Oct 27** | US New Home Sales (Sep) | 676K | 651K | 680K (rev.) | Beat |
@@ -132,7 +130,6 @@ Format: what → how the market reacted → why it matters.
 On deck next week (Nov 2 6)
 
 | **Day** | Event | Consensus / what to watch | Why it matters |
-| --- | --- | --- | --- |
 | **Fri Nov 6** | US jobs report (Oct), 8:30 a.m. | Payrolls +55K (Sept +29K); unemployment 4.2%; wages +0.3% m/m | Biggest input to a December hike. Barclays: bar is high for a weak print to stop it |
 | **Tue Nov 3** | US midterm elections | Polls: Democrats likely take the House, Senate tighter | Historically the market's best stretch of the 4-year cycle starts after the vote; also the date after which US–Iran strikes may resume |
 | **Mon Nov 2** | US ISM Manufacturing PMI (Oct), 10:00 a.m. | 54.7 (prev 54.5); prices-paid was 77.9 | Prices-paid is the inflation tell |
