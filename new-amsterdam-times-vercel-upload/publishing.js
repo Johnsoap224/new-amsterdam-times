@@ -27,7 +27,14 @@
     if (block?.type === "image") return `![${block.alt}](${block.src})`;
     if (block?.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
     if (block?.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;
-    if (block?.type === "table" && Array.isArray(block.rows)) return block.rows.map((row) => `| ${row.map((cell) => String(cell || "").replace(/\|/g, "\\|")).join(" | ")} |`).join("\n");
+    if (block?.type === "table" && Array.isArray(block.rows)) {
+      const rows = block.rows.map((row) => Array.isArray(row) ? row : []);
+      const columnCount = Math.max(0, ...rows.map((row) => row.length));
+      const formatRow = (row) => `| ${Array.from({ length: columnCount }, (_, index) => String(row[index] || "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ").trim()).join(" | ")} |`;
+      if (!columnCount) return "";
+      const [header = [], ...bodyRows] = rows;
+      return [formatRow(header), `| ${Array(columnCount).fill("---").join(" | ")} |`, ...bodyRows.map(formatRow)].join("\n");
+    }
     return String(block?.text || "");
   }).join("\n\n");
 
@@ -122,7 +129,7 @@
           <label class="field"><span>Description</span><textarea name="summary" maxlength="400" required>${escapeHtml(article.summary)}</textarea></label>
           <label class="field"><span>Author</span><input name="author" maxlength="100" required value="${escapeHtml(article.author)}" /></label>
           ${article.image ? `<label class="field"><span>Lead image description</span><input name="imageAlt" maxlength="250" required value="${escapeHtml(article.imageAlt)}" /><small>This text helps readers who use a screen reader.</small></label>` : `<input name="imageAlt" type="hidden" value="${escapeHtml(article.imageAlt || "Article image")}" />`}
-          <label class="field"><span>Article text</span><textarea class="article-edit-body" name="body" maxlength="50000" required>${escapeHtml(bodyEditorText(article))}</textarea><small>Use a blank line between blocks. Start headings with #. Keep table rows together in Markdown table format. Keep imported images in the form ![description](image path), or remove the line to remove an image.</small></label>
+          <label class="field"><span>Article text</span><textarea class="article-edit-body" name="body" maxlength="50000" required>${escapeHtml(bodyEditorText(article))}</textarea><small>Use a blank line between blocks. Start headings with #. Keep tables in Markdown table format. Keep imported images in the form ![description](image path). Check PDF table and figure placement against the source; move each block to the matching passage.</small></label>
           <div class="publication-panel__submit"><p data-edit-status aria-live="polite"></p><button type="submit">Save edits</button></div>
         </form>
       </details>
