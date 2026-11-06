@@ -26,6 +26,25 @@ class ArticleError(ValueError):
     pass
 
 
+def parse_markdown_table_row(line: str) -> list[str]:
+    """Split a pipe table row while preserving escaped literal pipes."""
+    cells = []
+    current = []
+    escaped = False
+    for character in line.strip().strip("|"):
+        if character == "|" and not escaped:
+            cells.append("".join(current).strip().replace(r"\|", "|"))
+            current = []
+            continue
+        current.append(character)
+        if character == "\\":
+            escaped = not escaped
+        else:
+            escaped = False
+    cells.append("".join(current).strip().replace(r"\|", "|"))
+    return cells
+
+
 def parse_scalar(raw: str):
     value = raw.strip()
     if value.lower() in {"true", "false"}:
@@ -118,7 +137,7 @@ def parse_article(path: Path) -> dict:
             continue
         lines = [line.strip() for line in block.splitlines()]
         if len(lines) >= 2 and all(re.fullmatch(r"\|.*\|", line) for line in lines):
-            rows = [[cell.strip().replace(r"\|", "|") for cell in line[1:-1].split("|")] for line in lines]
+            rows = [parse_markdown_table_row(line) for line in lines]
             divider = lambda row: bool(row) and all(re.fullmatch(r":?-{3,}:?", cell) for cell in row)
             rows = [row for row in rows if not divider(row)]
             if rows:
