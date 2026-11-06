@@ -8,6 +8,10 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function renderInlineText(value) {
+  return escapeHtml(value).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
 function siteUrl() {
   return `${process.env.PUBLIC_SITE_URL.replace(/\/$/, "")}/`;
 }
@@ -46,6 +50,10 @@ export function renderNewsletter(article, { test = false } = {}) {
   const unsubscribeUrl = test ? canonicalUrl : "{{{RESEND_UNSUBSCRIBE_URL}}}";
   const preheader = article.emailPreheader || article.summary;
   const bodyHtml = article.body.map((block) => {
+    if (typeof block !== "string" && block?.type === "paragraph") {
+      const indent = Math.min(48, Math.max(0, Number(block.indent) || 0));
+      return `<p style="margin:0 0 22px ${indent}px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${renderInlineText(block.text)}</p>`;
+    }
     if (typeof block !== "string" && block?.type === "image") {
       const imageUrl = new URL(block.src.replace(/^\//, ""), siteUrl()).toString();
       return `<p style="margin:0 0 22px;"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(block.alt)}" width="640" style="display:block;width:100%;max-width:640px;height:auto;border:0;" /></p>`;
@@ -54,15 +62,16 @@ export function renderNewsletter(article, { test = false } = {}) {
       return `<h2 style="margin:30px 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:25px;line-height:1.2;color:#171717;">${escapeHtml(block.text)}</h2>`;
     }
     if (typeof block !== "string" && block?.type === "list-item") {
-      return `<p style="margin:0 0 12px 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#222222;">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
+      const listTag = block.ordered ? "ol" : "ul";
+      return `<${listTag} style="margin:0 0 22px 22px;padding:0;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#222222;"><li style="padding:0;">${renderInlineText(block.text)}</li></${listTag}>`;
     }
     if (typeof block !== "string" && block?.type === "table" && Array.isArray(block.rows)) {
       const [header, ...rows] = block.rows;
-      const heading = `<thead><tr>${header.map((cell) => `<th align="left" style="padding:10px 8px;border-bottom:2px solid #173f5f;font:700 13px Arial,sans-serif;color:#173f5f;">${escapeHtml(cell)}</th>`).join("")}</tr></thead>`;
-      const body = rows.map((row) => `<tr>${header.map((_, index) => `<td valign="top" style="padding:9px 8px;border-bottom:1px solid #d8d4cb;font:14px/1.45 Arial,sans-serif;color:#222222;">${escapeHtml(row[index] || "")}</td>`).join("")}</tr>`).join("");
+      const heading = `<thead><tr>${header.map((cell) => `<th align="left" style="padding:10px 8px;border-bottom:2px solid #173f5f;font:700 13px Arial,sans-serif;color:#173f5f;">${renderInlineText(cell)}</th>`).join("")}</tr></thead>`;
+      const body = rows.map((row) => `<tr>${header.map((_, index) => `<td valign="top" style="padding:9px 8px;border-bottom:1px solid #d8d4cb;font:${index === 0 ? "700" : "400"} 14px/1.45 Arial,sans-serif;color:#222222;">${renderInlineText(row[index] || "")}</td>`).join("")}</tr>`).join("");
       return `<div style="margin:24px 0;overflow-x:auto;"><table role="table" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">${heading}<tbody>${body}</tbody></table></div>`;
     }
-    return `<p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${escapeHtml(block)}</p>`;
+    return `<p style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.65;color:#222222;">${renderInlineText(block)}</p>`;
   }).join("");
   const imageHtml = imageUrl ? `
     <tr><td style="padding:0 0 28px;">
