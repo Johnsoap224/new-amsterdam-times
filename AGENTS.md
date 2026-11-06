@@ -63,3 +63,10 @@ When the user asks for an article preview, follow the repository's `new-amsterda
 ## Current Priority
 
 The first deliverable is the landing page with realistic placeholder content and working links to article routes. The page should establish the publication's visual identity and provide a clean foundation for article pages and low-effort publishing.
+
+### Tables and embedded article images
+
+- Keep source tables as real Markdown tables. Include a header row and a Markdown separator row, escape literal pipe characters inside cells, and keep each source row intact. Do not flatten table cells into prose.
+- Extract pictures embedded in supplied PDFs and Word documents as inline article images. Keep them separate from the lead image, preserve their aspect ratio, and use descriptive alt text when the source provides it.
+- Check imported PDFs against their rendered pages. PDF extraction can detect tables and images but may not retain their exact positions within a page; move each table or figure in the review editor so it follows the corresponding source passage.
+- Before showing an article preview, verify every table and embedded image is present, correctly ordered, readable, and within the article margins on desktop and mobile. Fix issues in the article Markdown before asking the user to review it.
