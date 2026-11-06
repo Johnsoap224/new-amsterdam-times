@@ -135,6 +135,10 @@ def parse_article(path: Path) -> dict:
     for block in re.split(r"\n\s*\n", body_text.strip()):
         if not block.strip():
             continue
+        indented = re.fullmatch(r"<!--\s*nat-indent:\s*(\d+)\s*-->\s*\n([\s\S]+)", block.strip())
+        if indented:
+            body.append({"type": "paragraph", "indent": min(48, int(indented.group(1))), "text": " ".join(indented.group(2).splitlines()).strip()})
+            continue
         lines = [line.strip() for line in block.splitlines()]
         if len(lines) >= 2 and all(re.fullmatch(r"\|.*\|", line) for line in lines):
             rows = [parse_markdown_table_row(line) for line in lines]
