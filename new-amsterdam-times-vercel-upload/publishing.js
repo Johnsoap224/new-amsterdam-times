@@ -5,7 +5,12 @@
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
   })[character]);
+  const renderInlineText = (value) => escapeHtml(value).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
   const renderBody = (article) => article.body.map((block) => {
+    if (typeof block !== "string" && block?.type === "paragraph") {
+      const indent = Math.min(48, Math.max(0, Number(block.indent) || 0));
+      return `<p${indent ? ` style="margin-left:${indent}px"` : ""}>${renderInlineText(block.text)}</p>`;
+    }
     if (typeof block !== "string" && block?.type === "image") {
       return `<figure class="review-inline-image"><img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt)}" loading="lazy" /></figure>`;
     }
@@ -14,16 +19,18 @@
       return `<h${level}>${escapeHtml(block.text)}</h${level}>`;
     }
     if (typeof block !== "string" && block?.type === "list-item") {
-      return `<p class="review-list-item">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
+      const listTag = block.ordered ? "ol" : "ul";
+      return `<${listTag} class="article-list"><li>${renderInlineText(block.text)}</li></${listTag}>`;
     }
     if (typeof block !== "string" && block?.type === "table" && Array.isArray(block.rows)) {
       const [header, ...rows] = block.rows;
-      return `<div class="article-table-scroll" role="region" aria-label="Article data table" tabindex="0"><table class="article-data-table"><thead><tr>${header.map((cell) => `<th scope="col">${escapeHtml(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${header.map((_, index) => `<td data-label="${escapeHtml(header[index])}">${escapeHtml(row[index] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+      return `<div class="article-table-scroll" role="region" aria-label="Article data table" tabindex="0"><table class="article-data-table"><thead><tr>${header.map((cell) => `<th scope="col">${renderInlineText(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${header.map((_, index) => `<td data-label="${escapeHtml(header[index])}">${renderInlineText(row[index] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
     }
-    return `<p>${escapeHtml(block)}</p>`;
+    return `<p>${renderInlineText(block)}</p>`;
   }).join("");
   const bodyEditorText = (article) => article.body.map((block) => {
     if (typeof block === "string") return block;
+    if (block?.type === "paragraph") return `${block.indent ? `<!-- nat-indent: ${Math.min(48, Number(block.indent) || 0)} -->\n` : ""}${block.text || ""}`;
     if (block?.type === "image") return `![${block.alt}](${block.src})`;
     if (block?.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
     if (block?.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;

@@ -38,6 +38,7 @@
     "'": "&#39;",
     '"': "&quot;"
   })[character]);
+  const renderInlineText = (value) => escapeHtml(value).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
   const articleUrl = (article) => {
     const previewQuery = previewAllowed && article.status === "review" ? "&preview=1" : "";
     return `article.html?slug=${encodeURIComponent(article.slug)}${previewQuery}`;
@@ -243,6 +244,10 @@
       ? `<figure class="article-hero"><img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.imageAlt)}" /><figcaption>${escapeHtml(article.imageAlt)}.</figcaption></figure>`
       : "";
     const articleText = article.body.map((block, index) => {
+      if (typeof block !== "string" && block?.type === "paragraph") {
+        const indent = Math.min(48, Math.max(0, Number(block.indent) || 0));
+        return `<p${indent ? ` style="margin-left:${indent}px"` : ""}>${renderInlineText(block.text)}</p>`;
+      }
       if (typeof block !== "string" && block?.type === "image") {
         return `<figure class="article-inline-image"><img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt)}" loading="lazy" /></figure>`;
       }
@@ -251,13 +256,14 @@
         return `<h${level}>${escapeHtml(block.text)}</h${level}>`;
       }
       if (typeof block !== "string" && block?.type === "list-item") {
-        return `<p class="article-list-item">${block.ordered ? "1." : "•"} ${escapeHtml(block.text)}</p>`;
+        const listTag = block.ordered ? "ol" : "ul";
+        return `<${listTag} class="article-list"><li>${renderInlineText(block.text)}</li></${listTag}>`;
       }
       if (typeof block !== "string" && block?.type === "table" && Array.isArray(block.rows)) {
         const [header, ...rows] = block.rows;
-        return `<div class="article-table-scroll" role="region" aria-label="Article data table" tabindex="0"><table class="article-data-table"><thead><tr>${header.map((cell) => `<th scope="col">${escapeHtml(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${header.map((_, column) => `<td data-label="${escapeHtml(header[column])}">${escapeHtml(row[column] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+        return `<div class="article-table-scroll" role="region" aria-label="Article data table" tabindex="0"><table class="article-data-table"><thead><tr>${header.map((cell) => `<th scope="col">${renderInlineText(cell)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${header.map((_, column) => `<td data-label="${escapeHtml(header[column])}">${renderInlineText(row[column] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
       }
-      return `<p${index === 0 ? ' class="drop-cap"' : ""}>${escapeHtml(block)}</p>`;
+      return `<p${index === 0 ? ' class="drop-cap"' : ""}>${renderInlineText(block)}</p>`;
     }).join("");
 
     document.title = `${article.title} — The New Amsterdam Times`;
