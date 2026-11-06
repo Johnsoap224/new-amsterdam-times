@@ -58,7 +58,12 @@ function bodyBlockMarkdown(block) {
   if (block.type === "heading") return `${"#".repeat(Math.min(6, Math.max(1, Number(block.level) || 2)))} ${block.text}`;
   if (block.type === "list-item") return `${block.ordered ? "1." : "-"} ${block.text}`;
   if (block.type === "table" && Array.isArray(block.rows)) {
-    return block.rows.map((row) => `| ${row.map((cell) => String(cell || "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ")).join(" | ")} |`).join("\n");
+    const rows = block.rows.map((row) => Array.isArray(row) ? row : []);
+    const columnCount = Math.max(0, ...rows.map((row) => row.length));
+    const formatRow = (row) => `| ${Array.from({ length: columnCount }, (_, index) => String(row[index] || "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ").trim()).join(" | ")} |`;
+    if (!columnCount) return "";
+    const [header = [], ...bodyRows] = rows;
+    return [formatRow(header), `| ${Array(columnCount).fill("---").join(" | ")} |`, ...bodyRows.map(formatRow)].join("\n");
   }
   return String(block.text || "");
 }
