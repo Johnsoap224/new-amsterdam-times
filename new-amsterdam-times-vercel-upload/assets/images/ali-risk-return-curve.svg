@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1690" height="850" viewBox="0 0 1690 850" role="img" aria-labelledby="chart-title chart-description">
+  <title id="chart-title">Risk and expected return curve</title>
+  <desc id="chart-description">A rising curve places cash, short-term bonds, medium-term bonds, long-term bonds, large companies, and small companies from lower to higher risk and expected return.</desc>
+  <defs>
+    <marker id="axis-arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 1 1 L 12 7 L 1 13 Z" fill="#222" />
+    </marker>
+  </defs>
+  <rect width="1690" height="850" fill="#fff" />
+  <g fill="none" stroke="#222" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 286 737 L 286 94" stroke-width="5" marker-end="url(#axis-arrow)" />
+    <path d="M 286 737 L 1620 737" stroke-width="5" marker-end="url(#axis-arrow)" />
+    <path d="M 286 600 L 468 514 L 647 428 L 829 345 L 1008 263 L 1186 181 L 1365 96" stroke-width="3" marker-end="url(#axis-arrow)" />
+  </g>
+  <g fill="#fff" stroke="#222" stroke-width="4">
+    <circle cx="292" cy="600" r="19" />
+    <circle cx="466" cy="514" r="19" />
+    <circle cx="646" cy="428" r="19" />
+    <circle cx="828" cy="345" r="19" />
+    <circle cx="1008" cy="263" r="19" />
+    <circle cx="1186" cy="181" r="20" />
+  </g>
+  <g fill="#222" font-family="Arial, Helvetica, sans-serif" font-size="36">
+    <text x="54" y="342">Expected</text>
+    <text x="54" y="384">Return</text>
+    <text x="54" y="594">Risk free</text>
+    <text x="54" y="636">rate</text>
+    <text x="363" y="612">Cash</text>
+    <text x="510" y="550">Short term bonds</text>
+    <text x="690" y="465">Medium term bonds</text>
+    <text x="871" y="382">Long term bonds</text>
+    <text x="1054" y="300">Large companies</text>
+    <text x="1233" y="218">Small companies</text>
+    <text x="968" y="808" text-anchor="middle">Risk (standard deviation)</text>
+  </g>
+</svg>
