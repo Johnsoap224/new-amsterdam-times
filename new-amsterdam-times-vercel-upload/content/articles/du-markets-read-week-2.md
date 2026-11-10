@@ -6,7 +6,7 @@ author: "Ali Kanji"
 date: "2026-11-10T12:00:00-05:00"
 category: "Articles"
 image: "assets/images/du-markets-read-week-2.png"
-imageAlt: "Jensen Huang has been accused of having an extramarital affair with a potential Chinese spy"
+imageAlt: "Illustration of a red honey pot with yellow stars and a honey dipper"
 featured: false
 status: "published"
 ---
