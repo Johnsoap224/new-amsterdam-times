@@ -8,7 +8,7 @@ category: Newsletter
 image: "assets/images/general-electric-vernova-charge-of-ai.jpg"
 imageAlt: "General Electric Vernova was created in 2024 as part of the General Electric split"
 imageFit: cover
-featured: true
+featured: false
 status: published
 emailSubject: "General Electric Vernova Charge of AI"
 emailPreheader: "How are all these new AI systems being powered?"

@@ -3,13 +3,13 @@ title: "Nvidia stock had a wild weeks"
 slug: nvidia-stock-had-a-wild-weeks
 summary: "Jaden breaks down how the stock price changed"
 author: "Jaden Luskin"
-date: 2026-11-13T02:05:44.861Z
+date: 2026-11-13T02:06:42.867Z
 category: Articles
 image: "assets/images/nvidia-stock-had-a-wild-weeks.jpg"
 imageAlt: "Nvidia is a GPU Manufacturer"
 imageFit: cover
-featured: false
-status: review
+featured: true
+status: published
 emailSubject: "Nvidia stock had a wild weeks"
 emailPreheader: "Jaden breaks down how the stock price changed"
 ---
